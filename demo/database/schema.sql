@@ -91,10 +91,10 @@ CREATE INDEX idx_itinerary_detail_destinasi_id ON itinerary_detail(destinasi_id)
 
 -- Sample Users
 INSERT INTO users (username, password, role, nama_lengkap, email, no_telepon) VALUES
-('admin', '5f4dcc3b5aa765d61d8327deb882cf99', 'Admin', 'Administrator', 'admin@wisata.com', '081234567890'),
-('pengelola01', '5f4dcc3b5aa765d61d8327deb882cf99', 'Pengelola', 'Pengelola Wisata', 'pengelola@wisata.com', '082345678901'),
-('wisatawan01', '5f4dcc3b5aa765d61d8327deb882cf99', 'Wisatawan', 'Budi Santoso', 'budi@email.com', '083456789012'),
-('wisatawan02', '5f4dcc3b5aa765d61d8327deb882cf99', 'Wisatawan', 'Siti Nurhaliza', 'siti@email.com', '084567890123');
+('admin', 'admin', 'Admin', 'Administrator', 'admin@wisata.com', '081234567890'),
+('pengelola01', 'admin', 'Pengelola', 'Pengelola Wisata', 'pengelola@wisata.com', '082345678901'),
+('wisatawan01', 'admin', 'Wisatawan', 'Budi Santoso', 'budi@email.com', '083456789012'),
+('wisatawan02', 'admin', 'Wisatawan', 'Siti Nurhaliza', 'siti@email.com', '084567890123');
 
 -- Sample Destinasi (Wisata Indonesia)
 INSERT INTO destinasi (nama, kategori, harga, deskripsi, koordinat, lokasi, rating) VALUES
@@ -108,7 +108,7 @@ INSERT INTO destinasi (nama, kategori, harga, deskripsi, koordinat, lokasi, rati
 ('Kawah Putih', 'Alam', 100000, 'Danau kawah dengan air berwarna putih yang unik', '-6.8970,107.3570', 'Bandung, Jawa Barat', 4.4);
 
 -- ============================================================
--- KETERANGAN PASSWORD SAMPLE (MD5 Hash):
--- Username: admin, Pengelola, Wisatawan (semua)
--- Password: 'admin' (MD5: 5f4dcc3b5aa765d61d8327deb882cf99)
+-- KETERANGAN PASSWORD SAMPLE (Plain Text):
+-- Username: admin, pengelola01, wisatawan01, wisatawan02
+-- Password: 'admin' (Plain Text)
 -- ============================================================

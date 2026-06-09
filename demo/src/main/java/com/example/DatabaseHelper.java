@@ -17,34 +17,35 @@ import java.util.logging.Logger;
  * @version 1.0
  */
 public class DatabaseHelper {
-    
+
     // ============================================================
     // KONFIGURASI DATABASE
     // ============================================================
-    private static final String DB_URL = "jdbc:postgresql://localhost:5432/wisata_db";
+    private static final String DB_URL = "jdbc:postgresql://localhost:5433/wisata_db";
     private static final String DB_USER = "postgres";
-    private static final String DB_PASSWORD = "postgres";
+    private static final String DB_PASSWORD = "Saladass";
     private static final String DB_DRIVER = "org.postgresql.Driver";
-    
+
     // ============================================================
     // LOGGER
     // ============================================================
     private static final Logger LOGGER = Logger.getLogger(DatabaseHelper.class.getName());
-    
+
     // ============================================================
     // SINGLETON INSTANCE
     // ============================================================
     private static DatabaseHelper instance = null;
-    
+
     /**
      * Private constructor untuk singleton pattern
      */
     private DatabaseHelper() {
         initializeDriver();
     }
-    
+
     /**
      * Get instance dari DatabaseHelper (Singleton)
+     * 
      * @return DatabaseHelper instance
      */
     public static synchronized DatabaseHelper getInstance() {
@@ -53,11 +54,11 @@ public class DatabaseHelper {
         }
         return instance;
     }
-    
+
     // ============================================================
     // INISIALISASI DRIVER
     // ============================================================
-    
+
     /**
      * Inisialisasi PostgreSQL JDBC driver
      * ERROR HANDLING: Try-catch untuk menangkap ClassNotFoundException
@@ -72,15 +73,15 @@ public class DatabaseHelper {
             System.out.println("Message: " + e.getMessage());
         }
     }
-    
+
     // ============================================================
     // KONEKSI DATABASE
     // ============================================================
-    
+
     /**
      * Mendapatkan koneksi baru ke database
      * 
-     * ERROR HANDLING: 
+     * ERROR HANDLING:
      * - SQLException untuk error koneksi database
      * - Menampilkan pesan error yang detail
      * 
@@ -95,14 +96,14 @@ public class DatabaseHelper {
         } catch (SQLException e) {
             // ERROR HANDLING: Menangani SQL Exception
             LOGGER.log(Level.SEVERE, "ERROR: Gagal terhubung ke database", e);
-            
+
             // Menampilkan pesan error yang user-friendly
             System.out.println("====== DATABASE CONNECTION ERROR ======");
             System.out.println("Error Code: " + e.getErrorCode());
             System.out.println("SQL State: " + e.getSQLState());
             System.out.println("Message: " + e.getMessage());
             System.out.println("========================================");
-            
+
             // Cek tipe error untuk debugging
             if (e.getMessage().contains("Connection refused")) {
                 System.out.println("SOLUSI: PostgreSQL server tidak berjalan atau tidak dapat diakses");
@@ -114,15 +115,15 @@ public class DatabaseHelper {
                 System.out.println("SOLUSI: Database 'wisata_db' belum dibuat");
                 System.out.println("Buat database terlebih dahulu dengan menjalankan schema.sql");
             }
-            
+
             return null;
         }
     }
-    
+
     // ============================================================
     // UTILITY METHODS
     // ============================================================
-    
+
     /**
      * Test koneksi ke database
      * Berguna untuk memvalidasi konfigurasi database saat startup
@@ -154,7 +155,7 @@ public class DatabaseHelper {
             }
         }
     }
-    
+
     /**
      * Tutup koneksi database dengan aman
      * 
@@ -174,7 +175,7 @@ public class DatabaseHelper {
             }
         }
     }
-    
+
     /**
      * Tutup ResultSet dengan aman
      * 
@@ -191,7 +192,7 @@ public class DatabaseHelper {
             }
         }
     }
-    
+
     /**
      * Tutup PreparedStatement dengan aman
      * 
@@ -208,26 +209,26 @@ public class DatabaseHelper {
             }
         }
     }
-    
+
     /**
      * Tutup semua resource database (Connection, Statement, ResultSet)
      * 
      * ERROR HANDLING: Try-catch untuk setiap resource yang ditutup
      * 
      * @param connection Connection object
-     * @param statement PreparedStatement object
-     * @param resultSet ResultSet object
+     * @param statement  PreparedStatement object
+     * @param resultSet  ResultSet object
      */
     public static void closeAllResources(Connection connection, PreparedStatement statement, ResultSet resultSet) {
         closeResultSet(resultSet);
         closeStatement(statement);
         closeConnection(connection);
     }
-    
+
     // ============================================================
     // DATABASE QUERY HELPERS
     // ============================================================
-    
+
     /**
      * Execute query SELECT dan mengembalikan ResultSet
      * 
@@ -235,7 +236,7 @@ public class DatabaseHelper {
      * - Menangani SQLException dari PreparedStatement
      * - Menampilkan pesan error untuk debugging
      * 
-     * @param sql Query SQL (bisa menggunakan parameter ?)
+     * @param sql    Query SQL (bisa menggunakan parameter ?)
      * @param params Parameter untuk PreparedStatement (opsional)
      * @return ResultSet dari query, null jika error
      */
@@ -248,9 +249,9 @@ public class DatabaseHelper {
                 System.out.println("ERROR: Koneksi database gagal");
                 return null;
             }
-            
+
             pstmt = conn.prepareStatement(sql);
-            
+
             // ERROR HANDLING: Set parameter dengan type checking
             for (int i = 0; i < params.length; i++) {
                 try {
@@ -260,22 +261,28 @@ public class DatabaseHelper {
                     return null;
                 }
             }
-            
+
             return pstmt.executeQuery();
         } catch (SQLException e) {
             // ERROR HANDLING: SQL Exception
             LOGGER.log(Level.SEVERE, "ERROR: Gagal execute query - " + sql, e);
             System.out.println("ERROR Database: " + e.getMessage());
             if (conn != null) {
-                try { conn.close(); } catch (SQLException ignored) {}
+                try {
+                    conn.close();
+                } catch (SQLException ignored) {
+                }
             }
             if (pstmt != null) {
-                try { pstmt.close(); } catch (SQLException ignored) {}
+                try {
+                    pstmt.close();
+                } catch (SQLException ignored) {
+                }
             }
             return null;
         }
     }
-    
+
     /**
      * Execute INSERT, UPDATE, DELETE query
      * 
@@ -283,7 +290,7 @@ public class DatabaseHelper {
      * - SQLException untuk operasi database
      * - Validasi koneksi sebelum execute
      * 
-     * @param sql Query SQL (bisa menggunakan parameter ?)
+     * @param sql    Query SQL (bisa menggunakan parameter ?)
      * @param params Parameter untuk PreparedStatement (opsional)
      * @return Jumlah baris yang terpengaruh, -1 jika error
      */
@@ -291,16 +298,16 @@ public class DatabaseHelper {
         Connection conn = null;
         PreparedStatement pstmt = null;
         int result = -1;
-        
+
         try {
             conn = getConnection();
             if (conn == null) {
                 System.out.println("ERROR: Koneksi database gagal");
                 return -1;
             }
-            
+
             pstmt = conn.prepareStatement(sql);
-            
+
             // ERROR HANDLING: Set parameter
             for (int i = 0; i < params.length; i++) {
                 try {
@@ -310,21 +317,21 @@ public class DatabaseHelper {
                     return -1;
                 }
             }
-            
+
             result = pstmt.executeUpdate();
             LOGGER.log(Level.INFO, "Query berhasil dijalankan, " + result + " baris terpengaruh");
             return result;
-            
+
         } catch (SQLException e) {
             // ERROR HANDLING: Log dan tampilkan error
             LOGGER.log(Level.SEVERE, "ERROR: Gagal execute update - " + sql, e);
             System.out.println("ERROR Database: " + e.getMessage());
-            
+
             // Helpful error messages
             if (e.getMessage().contains("violation")) {
                 System.out.println("Catatan: Kemungkinan data duplikat atau constraint violation");
             }
-            
+
             return -1;
         } finally {
             // ERROR HANDLING: Cleanup resources

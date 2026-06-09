@@ -1,0 +1,349 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.SplitPane?>
+<?import javafx.scene.layout.VBox?>
+
+<!--
+=================================================================
+HALAMAN   : DETAIL DESTINASI WISATA
+FILE      : detail_destinasi.fxml
+Controller: com.example.DetailDestinasiController
+Kelompok  : B6
+
+LAYOUT:
+  - Header  : Tombol kembali | Judul destinasi | Wishlist | Bagikan
+  - Body    : SplitPane (2 kolom 50/50)
+              Kiri  → Gambar utama besar + Galeri foto thumbnail
+              Kanan → Judul, Kategori, Rating, Lokasi, Deskripsi,
+                      Jam Operasional, List Ulasan
+  - Footer  : Action Box — Harga mulai, Pesan Tiket, Chat Penjual
+
+DATABASE INTEGRATION NOTES:
+  - [DB] Query utama:
+         SELECT d.*, AVG(u.rating) as avg_rating, COUNT(u.id) as jml_ulasan
+         FROM destinasi d
+         LEFT JOIN ulasan u ON u.destinasi_id = d.id
+         WHERE d.id = ?
+         GROUP BY d.id
+  - [DB] Galeri foto: SELECT * FROM foto_destinasi WHERE destinasi_id = ?
+  - [DB] Ulasan terbaru: SELECT u.*, usr.nama FROM ulasan u
+         JOIN users usr ON usr.id = u.user_id
+         WHERE u.destinasi_id = ? ORDER BY u.created_at DESC LIMIT 5
+=================================================================
+-->
+
+<BorderPane
+    prefHeight="950.0"
+    prefWidth="1400.0"
+    styleClass="root"
+    stylesheets="@style.css"
+    xmlns="http://javafx.com/javafx/19"
+    xmlns:fx="http://javafx.com/fxml/1"
+    fx:controller="com.example.DetailDestinasiController">
+
+    <!-- ============================================================
+         TOP: HEADER BAR
+         ============================================================ -->
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="16.0"
+              style="-fx-padding: 14 30; -fx-background-color: #161616;
+                     -fx-border-color: #2a2a2a; -fx-border-width: 0 0 1 0;">
+
+            <!-- TOMBOL KEMBALI -->
+            <!-- [CONTROLLER] onAction="#handleBack" di DetailDestinasiController -->
+            <Button fx:id="backButton"
+                    style="-fx-background-color: rgba(255,255,255,0.06);
+                           -fx-text-fill: #DEFF9A; -fx-font-weight: bold;
+                           -fx-font-size: 14; -fx-padding: 9 16;
+                           -fx-border-radius: 10; -fx-background-radius: 10;"
+                    text="← Kembali" onAction="#handleBack" />
+
+            <Separator style="-fx-orientation: vertical; -fx-pref-height: 30;" />
+
+            <!-- [DB] Diisi dari destinasi.nama -->
+            <Label fx:id="destinasiNamaLabel"
+                   style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #f5f5f5;"
+                   text="Nama Destinasi" />
+
+            <Region HBox.hgrow="ALWAYS" />
+
+            <!-- ACTION BUTTONS HEADER -->
+            <!-- [CONTROLLER] onAction="#handleWishlist" -->
+            <Button fx:id="wishlistButton"
+                    styleClass="secondary"
+                    style="-fx-padding: 9 18; -fx-font-size: 13;"
+                    text="Wishlist" onAction="#handleWishlist" />
+            <!-- [CONTROLLER] onAction="#handleShare" -->
+            <Button styleClass="secondary"
+                    style="-fx-padding: 9 18; -fx-font-size: 13;"
+                    text="Bagikan" onAction="#handleShare" />
+        </HBox>
+    </top>
+
+    <!-- ============================================================
+         CENTER: SPLIT PANE KONTEN
+         ============================================================ -->
+    <center>
+        <ScrollPane fitToWidth="true" styleClass="scroll-pane">
+            <VBox spacing="0" style="-fx-background-color: #121212;">
+
+                <!-- SPLIT PANE: KIRI (Gambar) + KANAN (Detail) -->
+                <SplitPane dividerPositions="0.46"
+                           style="-fx-padding: 30; -fx-background-color: #121212;">
+
+                    <!-- ==========================================
+                         KIRI: GAMBAR UTAMA + GALERI THUMBNAIL
+                         ========================================== -->
+                    <VBox spacing="16.0" minWidth="400.0">
+
+                        <!-- GAMBAR UTAMA -->
+                        <!-- [DB] URL gambar dari destinasi.gambar_url -->
+                        <VBox alignment="CENTER"
+                              style="-fx-background-color: #1a1a1a;
+                                     -fx-border-color: #2e2e2e; -fx-border-width: 1;
+                                     -fx-border-radius: 15; -fx-background-radius: 15;
+                                     -fx-padding: 8; -fx-effect: dropshadow(gaussian,rgba(0,0,0,0.5),14,0,0,3);">
+                            <ImageView
+                                fx:id="mainImageView"
+                                fitHeight="380.0"
+                                fitWidth="580.0"
+                                preserveRatio="true"
+                                style="-fx-background-radius: 12;" />
+                        </VBox>
+
+                        <!-- GALERI THUMBNAIL -->
+                        <Label style="-fx-font-size: 12; -fx-font-weight: bold;
+                                      -fx-text-fill: #DAFFDE;" text="Galeri Foto:" />
+                        <!--
+                        [DB] Diisi dinamis dari SELECT * FROM foto_destinasi WHERE destinasi_id = ?
+                             Template thumbnail per foto:
+                             <ImageView styleClass="gallery-thumb"
+                                        fitHeight="90.0" fitWidth="90.0"
+                                        preserveRatio="true" />
+                        -->
+                        <FlowPane fx:id="galleryFlowPane"
+                                  hgap="10.0" vgap="10.0"
+                                  prefHeight="100.0">
+                            <!-- Placeholder thumbnail saat data kosong -->
+                            <VBox alignment="CENTER"
+                                  prefWidth="90" prefHeight="90"
+                                  styleClass="gallery-thumb">
+                                <Label style="-fx-font-size: 12;" text="IMAGE" />
+                            </VBox>
+                            <VBox alignment="CENTER"
+                                  prefWidth="90" prefHeight="90"
+                                  styleClass="gallery-thumb">
+                                <Label style="-fx-font-size: 12;" text="IMAGE" />
+                            </VBox>
+                            <VBox alignment="CENTER"
+                                  prefWidth="90" prefHeight="90"
+                                  styleClass="gallery-thumb">
+                                <Label style="-fx-font-size: 12;" text="IMAGE" />
+                            </VBox>
+                            <VBox alignment="CENTER"
+                                  prefWidth="90" prefHeight="90"
+                                  styleClass="gallery-thumb">
+                                <Label style="-fx-font-size: 12;" text="IMAGE" />
+                            </VBox>
+                        </FlowPane>
+                    </VBox>
+
+                    <!-- ==========================================
+                         KANAN: DETAIL INFORMASI
+                         ========================================== -->
+                    <ScrollPane fitToWidth="true"
+                                style="-fx-background-color: #121212; -fx-border-color: transparent;">
+                        <VBox spacing="22.0" style="-fx-padding: 0 20 20 20;">
+
+                            <!-- JUDUL & KATEGORI -->
+                            <VBox spacing="6.0">
+                                <!-- [DB] destinasi.nama -->
+                                <Label fx:id="judulLabel"
+                                       style="-fx-font-size: 30; -fx-font-weight: bold;
+                                              -fx-text-fill: #f5f5f5;"
+                                       text="Nama Destinasi Wisata"
+                                       wrapText="true" />
+                                <!-- [DB] destinasi.kategori -->
+                                <Label fx:id="kategoriLabel"
+                                       style="-fx-font-size: 13; -fx-text-fill: #DAFFDE;"
+                                       text="Kategori: Alam" />
+                            </VBox>
+
+                            <!-- RATING + LOKASI -->
+                            <HBox spacing="12.0" alignment="CENTER_LEFT">
+                                <VBox spacing="5.0">
+                                    <!-- [DB] AVG(ulasan.rating) -->
+                                    <Label fx:id="ratingLabel"
+                                           styleClass="rating-badge"
+                                           text="Rating: 4.8 / 5.0" />
+                                    <!-- [DB] COUNT(ulasan.id) -->
+                                    <Label fx:id="reviewCountLabel"
+                                           styleClass="subtitle"
+                                           text="245 ulasan" />
+                                </VBox>
+
+                                <Separator style="-fx-orientation: vertical;" />
+
+                                <VBox spacing="5.0">
+                                    <Label style="-fx-font-size: 11; -fx-font-weight: bold;
+                                                  -fx-text-fill: #DEFF9A;" text="LOKASI" />
+                                    <!-- [DB] destinasi.lokasi -->
+                                    <Label fx:id="lokasiLabel"
+                                           style="-fx-font-size: 14; -fx-text-fill: #f5f5f5;"
+                                           text="Magelang, Jawa Tengah"
+                                           wrapText="true" />
+                                </VBox>
+                            </HBox>
+
+                            <Separator />
+
+                            <!-- DESKRIPSI -->
+                            <VBox spacing="8.0">
+                                <Label style="-fx-font-size: 14; -fx-font-weight: bold;
+                                              -fx-text-fill: #DEFF9A;" text="Deskripsi" />
+                                <!-- [DB] destinasi.deskripsi — readonly TextArea -->
+                                <TextArea fx:id="deskripsiTextArea"
+                                          prefHeight="140.0"
+                                          editable="false"
+                                          style="-fx-control-inner-background: #1a1a1a;
+                                                 -fx-text-fill: #DAFFDE; -fx-font-size: 13;
+                                                 -fx-padding: 12; -fx-border-radius: 10;
+                                                 -fx-background-radius: 10;
+                                                 -fx-border-color: #2e2e2e;"
+                                          wrapText="true" />
+                            </VBox>
+
+                            <!-- JAM OPERASIONAL -->
+                            <VBox spacing="10.0"
+                                  style="-fx-padding: 16; -fx-background-color: #1a1a1a;
+                                         -fx-border-color: #2e2e2e; -fx-border-width: 1;
+                                         -fx-border-radius: 12; -fx-background-radius: 12;">
+                                <Label style="-fx-font-size: 14; -fx-font-weight: bold;
+                                              -fx-text-fill: #DEFF9A;" text="Jam Operasional" />
+                                <HBox spacing="40.0">
+                                    <!-- [DB] destinasi.jam_buka, destinasi.jam_tutup -->
+                                    <VBox spacing="4.0">
+                                        <Label styleClass="subtitle" text="Senin – Jumat" />
+                                        <Label fx:id="jamWeekdayLabel"
+                                               style="-fx-font-size: 14; -fx-font-weight: bold;
+                                                      -fx-text-fill: #f5f5f5;"
+                                               text="08:00 – 17:00" />
+                                    </VBox>
+                                    <VBox spacing="4.0">
+                                        <Label styleClass="subtitle" text="Sabtu – Minggu" />
+                                        <Label fx:id="jamWeekendLabel"
+                                               style="-fx-font-size: 14; -fx-font-weight: bold;
+                                                      -fx-text-fill: #f5f5f5;"
+                                               text="08:00 – 20:00" />
+                                    </VBox>
+                                    <VBox spacing="4.0">
+                                        <Label styleClass="subtitle" text="Status Hari Ini" />
+                                        <Label fx:id="statusLabel"
+                                               style="-fx-font-size: 13; -fx-font-weight: bold;
+                                                      -fx-text-fill: #4CAF50;"
+                                               text="Buka" />
+                                    </VBox>
+                                </HBox>
+                            </VBox>
+
+                            <!-- ULASAN TERAKHIR -->
+                            <VBox spacing="12.0">
+                                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                    <Label style="-fx-font-size: 14; -fx-font-weight: bold;
+                                                  -fx-text-fill: #DEFF9A;"
+                                           text="Ulasan Terbaru" />
+                                    <Region HBox.hgrow="ALWAYS" />
+                                    <!-- [CONTROLLER] onAction="#handleLihatSemuaUlasan" -->
+                                    <Button styleClass="secondary"
+                                            style="-fx-padding: 6 14; -fx-font-size: 11;"
+                                            text="Lihat Semua →" onAction="#handleLihatSemuaUlasan" />
+                                </HBox>
+
+                                <!--
+                                [DB] Diisi dari SELECT u.*, usr.nama FROM ulasan u
+                                     JOIN users usr ON usr.id = u.user_id
+                                     WHERE u.destinasi_id = ? ORDER BY u.created_at DESC LIMIT 5
+
+                                Template satu item ulasan:
+                                <VBox styleClass="review-item" spacing="6.0">
+                                    <HBox spacing="10.0" alignment="CENTER_LEFT">
+                                        <Label style="-fx-font-size: 13; -fx-font-weight: bold;
+                                                      -fx-text-fill: #f5f5f5;"
+                                               text="👤 {user.nama}" />
+                                        <Label styleClass="rating-badge" text="⭐ {ulasan.rating}" />
+                                        <Region HBox.hgrow="ALWAYS" />
+                                        <Label styleClass="subtitle" text="{ulasan.tanggal}" />
+                                    </HBox>
+                                    <Label styleClass="subtitle"
+                                           text="{ulasan.komentar}" wrapText="true" />
+                                </VBox>
+                                <Separator />
+                                -->
+                                <VBox fx:id="reviewVBox" spacing="0"
+                                      style="-fx-border-color: #2e2e2e; -fx-border-width: 1;
+                                             -fx-border-radius: 12; -fx-background-radius: 12;
+                                             -fx-padding: 16; -fx-background-color: #1a1a1a;">
+                                    <!-- Placeholder jika belum ada ulasan -->
+                                    <Label style="-fx-font-size: 13; -fx-text-fill: #555555;
+                                                  -fx-padding: 10 0;"
+                                           text="Belum ada ulasan untuk destinasi ini." />
+                                </VBox>
+                            </VBox>
+
+                        </VBox>
+                    </ScrollPane>
+
+                </SplitPane>
+
+                <Region style="-fx-min-height: 20;" />
+            </VBox>
+        </ScrollPane>
+    </center>
+
+    <!-- ============================================================
+         BOTTOM: ACTION BOX — Harga + Tombol Aksi
+         ============================================================ -->
+    <bottom>
+        <HBox alignment="CENTER_LEFT" spacing="20.0" styleClass="action-footer">
+
+            <!-- HARGA MULAI -->
+            <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                <Label style="-fx-font-size: 12; -fx-text-fill: #DAFFDE;"
+                       text="Harga mulai dari" />
+                <!-- [DB] destinasi.harga (harga terendah / tiket reguler) -->
+                <Label fx:id="hargaMulaiLabel"
+                       style="-fx-font-size: 28; -fx-font-weight: bold; -fx-text-fill: #DEFF9A;"
+                       text="Rp 50.000" />
+                <Label style="-fx-font-size: 11; -fx-text-fill: #555555;"
+                       text="per orang · sudah termasuk retribusi" />
+            </VBox>
+
+            <!-- TOMBOL CHAT PENJUAL -->
+            <!-- [CONTROLLER] onAction="#handleChatPenjual" -->
+            <Button styleClass="secondary"
+                    style="-fx-padding: 15 32; -fx-font-size: 14; -fx-font-weight: bold;"
+                    text="Chat Penjual" onAction="#handleChatPenjual" />
+
+            <!-- TOMBOL PESAN TIKET (Aksen #DEFF9A, teks hitam) -->
+            <!-- [CONTROLLER] onAction="#handlePesanTiket" → navigasi ke booking.fxml -->
+            <Button fx:id="pesanTiketButton"
+                    style="-fx-padding: 15 40; -fx-font-size: 14; -fx-font-weight: bold;
+                           -fx-background-color: #DEFF9A; -fx-text-fill: #121212;
+                           -fx-border-radius: 15; -fx-background-radius: 15;"
+                    text="Pesan Tiket" onAction="#handlePesanTiket" />
+
+        </HBox>
+    </bottom>
+
+</BorderPane>

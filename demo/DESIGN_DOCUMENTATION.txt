@@ -1,0 +1,258 @@
+/*
+=================================================================
+DOKUMENTASI: SISTEM INFORMASI WISATA - KELOMPOK B6
+MODERN DARK THEME DESIGN
+=================================================================
+*/
+
+STRUKTUR FILE:
+===============
+
+1. STYLESHEET (CSS):
+   📄 style.css
+   - File CSS global untuk semua halaman
+   - Mengandung: Colors, Buttons, Text Fields, Tables, Custom Classes
+   - Palet Warna:
+     * Background: #121212, #1a1a1a
+     * Accent: #DEFF9A (Hijau Muda)
+     * Text: #f5f5f5 (Utama), #DAFFDE (Sekunder)
+   - Custom Classes: .card, .header, .subtitle, .destination-card, .price-tag, etc.
+
+2. HALAMAN UTAMA (FXML):
+   📄 home.fxml
+   - Halaman eksplorasi destinasi wisata
+   - Komponen: Header Menu, Hero Section, Search Bar, Filter Bar, Destination Cards (FlowPane)
+   - Controller: HomeController.java
+   - Database Integration:
+     * Query: SELECT * FROM destinasi (dengan filter kategori, rating, harga)
+     * Populate FlowPane dengan dynamic destination cards
+     * Filter options dari distinct kategori
+
+   📄 detail_destinasi.fxml
+   - Halaman detail destinasi individual
+   - Layout: SplitPane (Gambar + Galeri | Detail Info)
+   - Komponen: Image, Rating, Location, Description, Reviews, Action Buttons
+   - Controller: DetailDestinasiController.java
+   - Database Integration:
+     * Query: SELECT * FROM destinasi WHERE id = ?
+     * Load reviews dari tabel review/ulasan
+     * Gambar dari URL atau path lokal
+
+   📄 booking.fxml
+   - Form pemesanan tiket dengan 5 steps
+   - Step 1: Pilih Tanggal (DatePicker)
+   - Step 2: Tipe Tiket (RadioButton: Reguler/VIP/Premium)
+   - Step 3: Jumlah Tiket (Spinner untuk Dewasa/Anak)
+   - Step 4: Data Pemesan (TextFields)
+   - Step 5: Syarat & Ketentuan (CheckBox)
+   - Summary Box dengan Auto-Calculation Total Harga
+   - Controller: BookingController.java
+   - Database Integration:
+     * Harga dari tabel destinasi atau jenis_tiket
+     * Save booking ke tabel pesanan/booking (status: Pending)
+     * Real-time calculation saat perubahan tiket/jumlah
+
+   📄 itinerary_planner.fxml
+   - Menampilkan rencana perjalanan dengan timeline
+   - Layout: Vertical timeline dengan jam kunjungan
+   - Setiap item: Nama Destinasi, Lokasi, Estimasi Durasi, Harga Tiket
+   - Summary: Total Biaya, Durasi Trip, Peserta
+   - Controller: ItineraryPlannerController.java
+   - Database Integration:
+     * Query: SELECT id.*,*, d.nama, d.harga FROM itinerary_detail it 
+              JOIN destinasi d ON it.destinasi_id = d.id 
+              WHERE it.itinerary_id = ? ORDER BY waktu_kunjungan
+     * Total biaya dari SUM(harga)
+
+STYLING GUIDE:
+==============
+
+CLASS UTAMA DI CSS:
+- .root: Global styling
+- .label, .label.header, .label.title, .label.subtitle, .label.rating
+- .button, .button:hover, .button.secondary, .button.danger
+- .text-field, .password-field, .text-area (dengan focus state)
+- .combo-box, .spinner, .date-picker (dengan dropdown styling)
+- .table-view (header #DEFF9A, row hover effect)
+- .card: Custom card container dengan shadow dan hover effect
+- .destination-card: Khusus untuk destination cards dengan scale transform
+- .price-tag: Label untuk harga dengan background #DEFF9A
+- .rating-badge: Badge untuk rating dengan background #FFD700
+- .hero-section: Gradient background untuk hero area
+
+HOVER EFFECTS:
+- Button: Warna mengubah, scale 1.02, shadow bertambah
+- Card: Border berubah ke #DEFF9A, shadow effect
+- Input Fields: Border berubah, effect glow
+
+COLOR TOKENS:
+- Primary Background: #121212 (-fx-base)
+- Secondary Background: #1a1a1a (-fx-control-inner-background)
+- Accent Color: #DEFF9A (Tombol, Border Aktif)
+- Text Primary: #f5f5f5
+- Text Secondary: #DAFFDE
+- Border Color: #333333
+- Rating Color: #FFD700
+- Error Color: #FF6B6B (jika ada)
+
+IMPLEMENTASI CONTROLLER:
+========================
+
+UNTUK SETIAP CONTROLLER, PERLU:
+1. Load FXML dengan FXMLLoader
+2. Set data dari database ke UI
+3. Add event listeners untuk interaksi user
+4. Implement auto-calculation (untuk booking & itinerary)
+5. Handle database queries dengan prepared statements
+
+CONTOH FLOW:
+-----------
+HomeController.java:
+├─ initialize():
+│  └─ populateDestinationCards() → Query destinasi, create cards
+│  └─ populateFilters() → Query kategori, set combo box
+├─ handleFilterChanged():
+│  └─ queryDestinasi(kategori, rating, harga) → Update FlowPane
+└─ handleCardClick(destinasiId):
+   └─ Navigate ke detail_destinasi.fxml dengan parameter
+
+DetailDestinasiController.java:
+├─ initialize():
+│  └─ queryDestinasi(destinasiId) → Load semua detail
+├─ loadImage():
+│  └─ Set ImageView dengan gambar dari URL/path
+├─ loadReviews():
+│  └─ Query reviews, populate VBox
+└─ handleBookButton():
+   └─ Navigate ke booking.fxml
+
+BookingController.java:
+├─ initialize():
+│  └─ Setup date picker (min=today, max=6bulan), spinner defaults
+├─ updateSummary():
+│  └─ Calculate: total = (harga_tiket × jumlah) + biaya_admin + asuransi
+│  └─ Update semua summary labels
+├─ handleTiketChange():
+│  └─ Call updateSummary()
+├─ handleJumlahChange():
+│  └─ Validate jumlah, call updateSummary()
+└─ handleKonfirmasiButton():
+   └─ Validate form, insert ke tabel booking, show confirmation
+
+ItineraryPlannerController.java:
+├─ initialize():
+│  └─ queryItinerary(itineraryId) → Load timeline items
+├─ populateTimeline():
+│  └─ Create HBox untuk setiap jam, populate timelineVBox
+├─ calculateTotalBiaya():
+│  └─ SUM semua harga tiket dalam itinerary
+└─ handleSimpanButton():
+   └─ Save itinerary changes ke database
+
+DATABASE TABLES YANG DIPERLUKAN:
+================================
+
+CREATE TABLE destinasi (
+    id SERIAL PRIMARY KEY,
+    nama VARCHAR(100) NOT NULL,
+    kategori VARCHAR(50),
+    harga INT,
+    deskripsi TEXT,
+    lokasi VARCHAR(200),
+    rating DECIMAL(3,2),
+    gambar_url VARCHAR(255),
+    jam_operasional_senin_jumat VARCHAR(20),
+    jam_operasional_sabtu_minggu VARCHAR(20),
+    created_at TIMESTAMP
+);
+
+CREATE TABLE jenis_tiket (
+    id SERIAL PRIMARY KEY,
+    destinasi_id INT REFERENCES destinasi(id),
+    nama_tiket VARCHAR(50),
+    harga INT,
+    deskripsi TEXT
+);
+
+CREATE TABLE pesanan (
+    id SERIAL PRIMARY KEY,
+    destinasi_id INT REFERENCES destinasi(id),
+    user_id INT,
+    tanggal_kunjungan DATE,
+    jenis_tiket_id INT REFERENCES jenis_tiket(id),
+    jumlah_dewasa INT,
+    jumlah_anak INT,
+    nama_pemesan VARCHAR(100),
+    email VARCHAR(100),
+    telepon VARCHAR(15),
+    catatan TEXT,
+    total_harga INT,
+    metode_pembayaran VARCHAR(50),
+    status VARCHAR(20),
+    created_at TIMESTAMP
+);
+
+CREATE TABLE itinerary (
+    id SERIAL PRIMARY KEY,
+    user_id INT,
+    nama_rencana VARCHAR(150),
+    tanggal_mulai DATE,
+    tanggal_selesai DATE,
+    deskripsi TEXT,
+    created_at TIMESTAMP
+);
+
+CREATE TABLE itinerary_detail (
+    id SERIAL PRIMARY KEY,
+    itinerary_id INT REFERENCES itinerary(id),
+    destinasi_id INT REFERENCES destinasi(id),
+    jam_kunjungan TIME,
+    estimasi_durasi INT,
+    created_at TIMESTAMP
+);
+
+CREATE TABLE review (
+    id SERIAL PRIMARY KEY,
+    destinasi_id INT REFERENCES destinasi(id),
+    user_id INT,
+    rating DECIMAL(3,2),
+    komentar TEXT,
+    created_at TIMESTAMP
+);
+
+CARA MENGGUNAKAN:
+=================
+
+1. Copy semua FXML files ke: src/main/resources/com/example/
+2. Copy style.css ke: src/main/resources/com/example/
+3. Buat controller classes di: src/main/java/com/example/
+4. Setup database dengan schema di atas
+5. Update connection string di DatabaseHelper.java
+6. Load halaman pertama (home.fxml) di App.java atau main entry point
+7. Implement navigation antara halaman menggunakan FXMLLoader
+
+TIPS DEVELOPMENT:
+=================
+
+✓ Gunakan FXMLLoader.setControllerFactory() jika perlu dependency injection
+✓ Implement Pageable/Pagination untuk destination cards (jika banyak data)
+✓ Cache gambar yang sering diakses
+✓ Validasi input di controller sebelum database operation
+✓ Gunakan Thread/Task untuk query database jangan di UI thread
+✓ Implement error handling untuk setiap database operation
+✓ Gunakan try-with-resources untuk resource management
+✓ Encrypt password sebelum simpan ke database
+✓ Gunakan prepared statement untuk prevent SQL injection
+
+MOBILE RESPONSIVE:
+==================
+
+Untuk membuat responsive:
+- Set Scene dengan stage.setResizable(true)
+- Gunakan HBox.hgrow="ALWAYS" dan VBox.vgrow="ALWAYS"
+- Set prefWidth/Height di komponen, jangan fixed width
+- Test dengan berbagai ukuran window
+- Gunakan ScrollPane untuk handle overflow
+
+Selamat mengembangkan Sistem Informasi Wisata!
+Kelompok B6 - 2024

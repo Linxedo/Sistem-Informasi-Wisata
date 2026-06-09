@@ -1,12 +1,14 @@
 /**
  * =====================================================================
- * APPLICATION CSS - Dark Theme untuk Sistem Eksplorasi Wisata
+ * APPLICATION CSS - Modern Theme untuk Sistem Eksplorasi Wisata
  * =====================================================================
  * 
  * Warna Utama:
- * - Background Gelap: #121212, #1a1a1a
- * - Aksen/Tombol: #DEFF9A (Hijau Muda)
- * - Teks: #DAFFDE, #f5f5f5 (Putih Terang)
+ * - Primary Blue: #0D47A1 (Biru Tua)
+ * - Secondary Blue: #1976D2 (Biru Sedang)
+ * - Accent Orange: #FF9800 (Oranye)
+ * - Background: #FFFFFF, #F5F5F5
+ * - Text: #333333, #666666
  * 
  */
 
@@ -15,12 +17,12 @@
    ===================================================================== */
 
 .root {
-    -fx-base: #121212;
-    -fx-background-color: #121212;
-    -fx-control-inner-background: #1a1a1a;
-    -fx-text-fill: #DAFFDE;
-    -fx-faint-focus-color: #DEFF9A;
-    -fx-focus-color: #DEFF9A;
+    -fx-base: #FFFFFF;
+    -fx-background-color: #F5F5F5;
+    -fx-control-inner-background: #FFFFFF;
+    -fx-text-fill: #333333;
+    -fx-faint-focus-color: #FF9800;
+    -fx-focus-color: #FF9800;
 }
 
 /* =====================================================================
@@ -28,7 +30,7 @@
    ===================================================================== */
 
 .label {
-    -fx-text-fill: #DAFFDE;
+    -fx-text-fill: #333333;
     -fx-font-size: 12;
 }
 
@@ -39,37 +41,37 @@
 .text-field,
 .password-field,
 .text-area {
-    -fx-control-inner-background: #1a1a1a;
-    -fx-text-fill: #f5f5f5;
-    -fx-padding: 8;
+    -fx-control-inner-background: #FFFFFF;
+    -fx-text-fill: #333333;
+    -fx-padding: 10;
     -fx-border-radius: 5;
-    -fx-border-color: #DEFF9A;
+    -fx-border-color: #DDDDDD;
     -fx-border-width: 1;
     -fx-font-size: 12;
-    -fx-focus-color: #DEFF9A;
-    -fx-faint-focus-color: #DEFF9A;
+    -fx-focus-color: #FF9800;
+    -fx-faint-focus-color: #FFE0B2;
 }
 
 .text-field:hover,
 .password-field:hover,
 .text-area:hover {
-    -fx-border-color: #b8db6f;
+    -fx-border-color: #FF9800;
     -fx-border-width: 2;
 }
 
 .text-field:focused,
 .password-field:focused,
 .text-area:focused {
-    -fx-border-color: #DEFF9A;
+    -fx-border-color: #FF9800;
     -fx-border-width: 2;
-    -fx-padding: 7;
+    -fx-padding: 9;
 }
 
 /* Placeholder text */
 .text-field:prompt,
 .password-field:prompt,
 .text-area:prompt {
-    -fx-text-fill: #888888;
+    -fx-text-fill: #AAAAAA;
 }
 
 /* =====================================================================
@@ -77,35 +79,37 @@
    ===================================================================== */
 
 .button {
-    -fx-padding: 10 20;
+    -fx-padding: 12 24;
     -fx-font-size: 12;
     -fx-font-weight: bold;
-    -fx-background-color: #DEFF9A;
-    -fx-text-fill: #121212;
+    -fx-background-color: #FF9800;
+    -fx-text-fill: #FFFFFF;
     -fx-border-radius: 5;
     -fx-background-radius: 5;
     -fx-cursor: hand;
     -fx-border-width: 0;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 5, 0, 0, 2);
 }
 
 .button:hover {
-    -fx-background-color: #b8db6f;
-    -fx-text-fill: #000000;
+    -fx-background-color: #F57C00;
+    -fx-text-fill: #FFFFFF;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 8, 0, 0, 3);
 }
 
 .button:pressed {
-    -fx-background-color: #9fc84d;
-    -fx-padding: 11 19;
+    -fx-background-color: #E65100;
+    -fx-padding: 13 23;
 }
 
 .button:focused {
-    -fx-border-color: #DAFFDE;
+    -fx-border-color: #FF9800;
     -fx-border-width: 2;
     -fx-border-radius: 5;
 }
 
 .button:disabled {
-    -fx-background-color: #555555;
+    -fx-background-color: #CCCCCC;
     -fx-text-fill: #888888;
     -fx-cursor: default;
 }
@@ -115,44 +119,44 @@
    ===================================================================== */
 
 .combo-box {
-    -fx-background-color: #1a1a1a;
-    -fx-border-color: #DEFF9A;
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #DDDDDD;
     -fx-border-width: 1;
     -fx-border-radius: 5;
-    -fx-padding: 8;
-    -fx-text-fill: #f5f5f5;
+    -fx-padding: 10;
+    -fx-text-fill: #333333;
     -fx-font-size: 12;
 }
 
 .combo-box:hover {
-    -fx-border-color: #b8db6f;
+    -fx-border-color: #FF9800;
     -fx-border-width: 2;
-    -fx-padding: 7;
+    -fx-padding: 9;
 }
 
 .combo-box:focused {
-    -fx-border-color: #DEFF9A;
+    -fx-border-color: #FF9800;
     -fx-border-width: 2;
-    -fx-padding: 7;
+    -fx-padding: 9;
 }
 
 .combo-box-popup .list-view {
-    -fx-background-color: #1a1a1a;
+    -fx-background-color: #FFFFFF;
     -fx-padding: 5;
 }
 
 .combo-box-popup .list-view .list-cell {
-    -fx-text-fill: #DAFFDE;
-    -fx-background-color: #1a1a1a;
+    -fx-text-fill: #333333;
+    -fx-background-color: #FFFFFF;
 }
 
 .combo-box-popup .list-view .list-cell:hover {
-    -fx-background-color: #2a2a2a;
+    -fx-background-color: #F5F5F5;
 }
 
 .combo-box-popup .list-view .list-cell:selected {
-    -fx-background-color: #DEFF9A;
-    -fx-text-fill: #121212;
+    -fx-background-color: #FF9800;
+    -fx-text-fill: #FFFFFF;
 }
 
 /* =====================================================================
@@ -160,21 +164,21 @@
    ===================================================================== */
 
 .check-box {
-    -fx-text-fill: #DAFFDE;
+    -fx-text-fill: #333333;
     -fx-font-size: 12;
 }
 
 .check-box:selected .box {
-    -fx-background-color: #DEFF9A;
-    -fx-border-color: #DEFF9A;
+    -fx-background-color: #FF9800;
+    -fx-border-color: #FF9800;
 }
 
 .check-box:selected .mark {
-    -fx-text-fill: #121212;
+    -fx-text-fill: #FFFFFF;
 }
 
 .check-box .box {
-    -fx-border-color: #DEFF9A;
+    -fx-border-color: #CCCCCC;
     -fx-border-width: 2;
     -fx-border-radius: 3;
 }
@@ -184,15 +188,15 @@
    ===================================================================== */
 
 .table-view {
-    -fx-background-color: #1a1a1a;
-    -fx-control-inner-background: #1a1a1a;
-    -fx-table-cell-border-color: #2a2a2a;
-    -fx-text-fill: #DAFFDE;
+    -fx-background-color: #FFFFFF;
+    -fx-control-inner-background: #FFFFFF;
+    -fx-table-cell-border-color: #EEEEEE;
+    -fx-text-fill: #333333;
 }
 
 .table-view .column-header {
-    -fx-background-color: #DEFF9A;
-    -fx-text-fill: #121212;
+    -fx-background-color: #0D47A1;
+    -fx-text-fill: #FFFFFF;
     -fx-font-weight: bold;
     -fx-font-size: 12;
 }

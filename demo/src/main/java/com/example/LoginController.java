@@ -27,50 +27,58 @@ import java.util.logging.Logger;
  * @author Sistem Eksplorasi Wisata B6
  */
 public class LoginController {
-    
+
     // ============================================================
     // FXML COMPONENTS
     // ============================================================
-    
-    @FXML private TextField usernameField;
-    @FXML private PasswordField passwordField;
-    @FXML private ComboBox<String> roleComboBox;
-    @FXML private Label statusLabel;
-    @FXML private Button loginButton;
-    @FXML private Button exitButton;
-    @FXML private CheckBox rememberCheckBox;
-    @FXML private Hyperlink forgotPasswordLink;
-    
+
+    @FXML
+    private TextField usernameField;
+    @FXML
+    private PasswordField passwordField;
+    @FXML
+    private ComboBox<String> roleComboBox;
+    @FXML
+    private Label statusLabel;
+    @FXML
+    private Button loginButton;
+    @FXML
+    private Button exitButton;
+    @FXML
+    private CheckBox rememberCheckBox;
+    @FXML
+    private Hyperlink forgotPasswordLink;
+
     // ============================================================
     // LOGGER
     // ============================================================
-    
+
     private static final Logger LOGGER = Logger.getLogger(LoginController.class.getName());
-    
+
     // ============================================================
     // SESSION - Menyimpan user yang sedang login
     // ============================================================
-    
+
     private static User currentUser = null;
-    
+
     /**
      * Get user yang sedang login
      */
     public static User getCurrentUser() {
         return currentUser;
     }
-    
+
     /**
      * Set user yang sedang login
      */
     public static void setCurrentUser(User user) {
         currentUser = user;
     }
-    
+
     // ============================================================
     // INITIALIZE
     // ============================================================
-    
+
     /**
      * Initialize controller - dipanggil otomatis saat FXML di-load
      */
@@ -79,16 +87,16 @@ public class LoginController {
         // Tambahkan opsi role ke ComboBox
         roleComboBox.getItems().addAll("Admin", "Pengelola", "Wisatawan");
         roleComboBox.setValue("Wisatawan");
-        
+
         // Set event listener untuk Enter key
         usernameField.setOnAction(e -> handleLogin());
         passwordField.setOnAction(e -> handleLogin());
     }
-    
+
     // ============================================================
     // LOGIN HANDLER
     // ============================================================
-    
+
     /**
      * Handle tombol Login
      * 
@@ -103,38 +111,38 @@ public class LoginController {
         String username = usernameField.getText().trim();
         String password = passwordField.getText();
         String role = roleComboBox.getValue();
-        
+
         // ========== VALIDASI INPUT ==========
         // ERROR HANDLING: Cek input kosong
         if (username.isEmpty() || password.isEmpty()) {
-            showError("Validasi Gagal", 
-                     "Username dan password tidak boleh kosong!");
+            showError("Validasi Gagal",
+                    "Username dan password tidak boleh kosong!");
             LOGGER.log(Level.WARNING, "Login attempt dengan input kosong");
             return;
         }
-        
+
         if (username.length() < 3) {
-            showError("Validasi Gagal", 
-                     "Username minimal 3 karakter");
+            showError("Validasi Gagal",
+                    "Username minimal 3 karakter");
             return;
         }
-        
+
         if (password.length() < 1) {
-            showError("Validasi Gagal", 
-                     "Password tidak boleh kosong");
+            showError("Validasi Gagal",
+                    "Password tidak boleh kosong");
             return;
         }
-        
+
         // ========== AUTHENTICATE ==========
         User authenticatedUser = authenticateUser(username, password, role);
-        
+
         if (authenticatedUser != null) {
             // Login berhasil
             LOGGER.log(Level.INFO, "User berhasil login: " + username);
             setCurrentUser(authenticatedUser);
-            showInfo("Berhasil", 
+            showInfo("Berhasil",
                     "Selamat datang " + authenticatedUser.getNamaLengkap() + "!");
-            
+
             // Pindah ke halaman dashboard
             try {
                 openDashboard(authenticatedUser);
@@ -149,11 +157,11 @@ public class LoginController {
             statusLabel.setStyle("-fx-text-fill: #FF6B6B;");
         }
     }
-    
+
     // ============================================================
     // AUTHENTICATE USER FROM DATABASE
     // ============================================================
-    
+
     /**
      * Authenticate user dari database
      * 
@@ -165,58 +173,55 @@ public class LoginController {
      * 
      * @param username Username yang diinput
      * @param password Password yang diinput
-     * @param role Role yang dipilih
+     * @param role     Role yang dipilih
      * @return User object jika berhasil, null jika gagal
      */
     private User authenticateUser(String username, String password, String role) {
         Connection conn = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
-        
+
         try {
             // ========== KONEKSI DATABASE ==========
             // ERROR HANDLING: Cek koneksi database
             conn = DatabaseHelper.getInstance().getConnection();
             if (conn == null) {
-                showError("Database Error", 
-                         "Gagal terhubung ke database.\n" +
-                         "Pastikan PostgreSQL sudah berjalan dan database 'wisata_db' sudah dibuat.");
+                showError("Database Error",
+                        "Gagal terhubung ke database.\n" +
+                                "Pastikan PostgreSQL sudah berjalan dan database 'wisata_db' sudah dibuat.");
                 LOGGER.log(Level.SEVERE, "Database connection failed during login");
                 return null;
             }
-            
+
             // ========== QUERY DATABASE ==========
             // SQL query untuk mencari user berdasarkan username dan role
             String sql = "SELECT id, username, password, role, nama_lengkap, email, no_telepon " +
-                        "FROM users WHERE username = ? AND role = ?";
-            
+                    "FROM users WHERE username = ? AND role = ?";
+
             pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, username);
             pstmt.setString(2, role);
-            
+
             // ERROR HANDLING: Execute query
             rs = pstmt.executeQuery();
-            
+
             // ========== VALIDASI RESULT ==========
             if (rs.next()) {
                 // User ditemukan, validasi password
                 String storedPassword = rs.getString("password");
-                
-                // Hash password input untuk dibandingkan
-                String hashedInputPassword = hashPassword(password);
-                
-                if (hashedInputPassword.equals(storedPassword)) {
+
+                // Bandingkan password secara langsung (plain text)
+                if (password.equals(storedPassword)) {
                     // PASSWORD COCOK - LOGIN BERHASIL
                     User user = new User(
-                        rs.getInt("id"),
-                        rs.getString("username"),
-                        rs.getString("password"),
-                        rs.getString("role"),
-                        rs.getString("nama_lengkap"),
-                        rs.getString("email"),
-                        rs.getString("no_telepon")
-                    );
-                    
+                            rs.getInt("id"),
+                            rs.getString("username"),
+                            rs.getString("password"),
+                            rs.getString("role"),
+                            rs.getString("nama_lengkap"),
+                            rs.getString("email"),
+                            rs.getString("no_telepon"));
+
                     LOGGER.log(Level.INFO, "User authenticated successfully: " + username);
                     return user;
                 } else {
@@ -229,7 +234,7 @@ public class LoginController {
                 LOGGER.log(Level.WARNING, "User not found: " + username + " with role: " + role);
                 return null;
             }
-            
+
         } catch (Exception e) {
             // ERROR HANDLING: Exception dari database
             LOGGER.log(Level.SEVERE, "Error during authentication", e);
@@ -237,41 +242,44 @@ public class LoginController {
             System.out.println("Message: " + e.getMessage());
             System.out.println("Type: " + e.getClass().getSimpleName());
             System.out.println("==============================");
-            
+
             showError("Error", "Terjadi kesalahan saat proses login.\n" + e.getMessage());
             return null;
-            
+
         } finally {
             // ERROR HANDLING: Resource cleanup
             // Tutup semua resource dengan aman
             try {
-                if (rs != null) rs.close();
+                if (rs != null)
+                    rs.close();
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "Error closing ResultSet", e);
             }
-            
+
             try {
-                if (pstmt != null) pstmt.close();
+                if (pstmt != null)
+                    pstmt.close();
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "Error closing PreparedStatement", e);
             }
-            
+
             try {
-                if (conn != null) conn.close();
+                if (conn != null)
+                    conn.close();
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "Error closing Connection", e);
             }
         }
     }
-    
+
     // ============================================================
     // PASSWORD HASHING
     // ============================================================
-    
+
     /**
      * Hash password menggunakan MD5 (untuk sample - gunakan bcrypt di production)
      * 
-     * NOTE: MD5 tidak aman untuk production! 
+     * NOTE: MD5 tidak aman untuk production!
      * Gunakan bcrypt, Argon2, atau scrypt untuk aplikasi real.
      * 
      * @param password Password yang akan di-hash
@@ -291,11 +299,11 @@ public class LoginController {
             return "";
         }
     }
-    
+
     // ============================================================
     // NAVIGATION
     // ============================================================
-    
+
     /**
      * Buka halaman dashboard
      * 
@@ -309,30 +317,30 @@ public class LoginController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("dashboard.fxml"));
             Parent root = loader.load();
-            
+
             // Get controller dan set current user
             DashboardController controller = loader.getController();
             controller.setCurrentUser(user);
             controller.loadDestinations();
-            
+
             // Buka scene baru
             Stage stage = (Stage) loginButton.getScene().getWindow();
             Scene scene = new Scene(root);
-            
+
             // Load CSS
             String css = getClass().getResource("application.css").toExternalForm();
             scene.getStylesheets().add(css);
-            
+
             stage.setScene(scene);
             stage.setTitle("Sistem Eksplorasi Wisata - Dashboard");
             stage.show();
-            
+
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Error loading dashboard", e);
             throw e;
         }
     }
-    
+
     /**
      * Handle tombol Exit
      */
@@ -341,11 +349,11 @@ public class LoginController {
         Stage stage = (Stage) exitButton.getScene().getWindow();
         stage.close();
     }
-    
+
     // ============================================================
     // HELPER METHODS
     // ============================================================
-    
+
     /**
      * Tampilkan error dialog
      */
@@ -356,7 +364,7 @@ public class LoginController {
         alert.setContentText(message);
         alert.showAndWait();
     }
-    
+
     /**
      * Tampilkan info dialog
      */

@@ -49,22 +49,22 @@ public class App extends Application {
         }
         System.out.println();
         
-        // ========== LOAD LOGIN FXML ==========
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("login.fxml"));
+        // ========== LOAD HOME FXML (Halaman Utama) ==========
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("home.fxml"));
         Parent root = fxmlLoader.load();
         
-        // ========== CREATE SCENE WITH CSS ==========
-        scene = new Scene(root, 800, 600);
+        // ========== CREATE SCENE WITH DARK THEME CSS ==========
+        scene = new Scene(root, 1400, 900);
         
-        // Apply dark theme CSS
-        String css = getClass().getResource("application.css").toExternalForm();
+        // Apply dark theme CSS (style.css)
+        String css = getClass().getResource("style.css").toExternalForm();
         scene.getStylesheets().add(css);
         
         // ========== SETUP STAGE ==========
-        stage.setTitle("Sistem Eksplorasi Wisata - Kelompok B6");
+        stage.setTitle("Sistem Informasi Wisata - Kelompok B6");
         stage.setScene(scene);
-        stage.setWidth(800);
-        stage.setHeight(600);
+        stage.setWidth(1400);
+        stage.setHeight(900);
         stage.setResizable(true);
         stage.setOnCloseRequest(e -> {
             LOGGER.log(Level.INFO, "Application closed");

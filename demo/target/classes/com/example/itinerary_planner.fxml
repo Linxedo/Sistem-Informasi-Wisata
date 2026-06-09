@@ -1,0 +1,563 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<!--
+=================================================================
+HALAMAN   : ITINERARY PLANNER
+FILE      : itinerary_planner.fxml
+Controller: com.example.ItineraryPlannerController
+Kelompok  : B6
+
+LAYOUT:
+  - Header  : Kembali | Judul | Info trip (nama, tanggal, durasi)
+  - Body    : VBox Timeline vertikal per jam kunjungan
+              Setiap item: [Badge Jam] — [Card Destinasi]
+  - Footer  : Estimasi total biaya + tombol Simpan & Bagikan
+
+DATABASE INTEGRATION NOTES:
+  - [DB] Header info: SELECT nama, tanggal_mulai, tanggal_akhir
+                      FROM itinerary WHERE id = ? AND user_id = ?
+  - [DB] Timeline items: SELECT id.*, d.nama, d.lokasi, d.harga
+                         FROM itinerary_detail id
+                         JOIN destinasi d ON d.id = id.destinasi_id
+                         WHERE id.itinerary_id = ?
+                         ORDER BY id.jam_kunjungan ASC
+  - [DB] Total biaya: SELECT SUM(d.harga * id.jumlah_tiket)
+                      FROM itinerary_detail id
+                      JOIN destinasi d ON d.id = id.destinasi_id
+                      WHERE id.itinerary_id = ?
+  - [DB] Simpan: UPDATE itinerary SET nama=?, updated_at=NOW() WHERE id=?
+  - [DB] Hapus item: DELETE FROM itinerary_detail WHERE id=?
+=================================================================
+-->
+
+<BorderPane
+    prefHeight="900.0"
+    prefWidth="1400.0"
+    styleClass="root"
+    stylesheets="@style.css"
+    xmlns="http://javafx.com/javafx/19"
+    xmlns:fx="http://javafx.com/fxml/1"
+    fx:controller="com.example.ItineraryPlannerController">
+
+    <!-- ============================================================
+         TOP: HEADER
+         ============================================================ -->
+    <top>
+        <VBox spacing="14.0"
+              style="-fx-padding: 20 40; -fx-background-color: #161616;
+                     -fx-border-color: #DEFF9A; -fx-border-width: 0 0 2 0;">
+
+            <HBox alignment="CENTER_LEFT" spacing="16.0">
+                <!-- [CONTROLLER] onAction="#handleBack" -->
+                <Button styleClass="secondary"
+                        style="-fx-padding: 8 16; -fx-font-size: 13;"
+                        text="← Kembali" onAction="#handleBack" />
+
+                <Label style="-fx-font-size: 26; -fx-font-weight: bold;
+                              -fx-text-fill: #DEFF9A;"
+                       text="Rencana Perjalanan Saya" />
+
+                <Region HBox.hgrow="ALWAYS" />
+
+                <!-- [CONTROLLER] onAction="#handleEditNama" -->
+                <Button styleClass="secondary"
+                        style="-fx-padding: 8 18; -fx-font-size: 13;"
+                        text="Edit" />
+                <!-- [CONTROLLER] onAction="#handleTambahDestinasi" -->
+                <Button style="-fx-padding: 8 18; -fx-font-size: 13;
+                               -fx-font-weight: bold;"
+                        text="Tambah Destinasi" onAction="#handleTambahDestinasi" />
+                <!-- [CONTROLLER] onAction="#handleHapusItinerary" -->
+                <Button styleClass="danger"
+                        style="-fx-padding: 8 18; -fx-font-size: 13;"
+                        text="Hapus" onAction="#handleHapusItinerary" />
+            </HBox>
+
+            <!-- TRIP INFO CHIPS -->
+            <HBox spacing="32.0">
+                <!-- [DB] itinerary.nama -->
+                <VBox spacing="3.0">
+                    <Label style="-fx-font-size: 11; -fx-text-fill: #555555;
+                                  -fx-font-weight: bold;" text="NAMA RENCANA" />
+                    <Label fx:id="namaRencanaLabel"
+                           style="-fx-font-size: 15; -fx-font-weight: bold;
+                                  -fx-text-fill: #f5f5f5;"
+                           text="Liburan ke Yogyakarta" />
+                </VBox>
+
+                <Separator style="-fx-orientation: vertical;" />
+
+                <!-- [DB] itinerary.tanggal_mulai, tanggal_akhir -->
+                <VBox spacing="3.0">
+                    <Label style="-fx-font-size: 11; -fx-text-fill: #555555;
+                                  -fx-font-weight: bold;" text="TANGGAL" />
+                    <Label fx:id="tanggalRencanaLabel"
+                           style="-fx-font-size: 15; -fx-font-weight: bold;
+                                  -fx-text-fill: #f5f5f5;"
+                           text="10 – 12 Juni 2024" />
+                </VBox>
+
+                <Separator style="-fx-orientation: vertical;" />
+
+                <!-- [DB] Hitung dari selisih tanggal -->
+                <VBox spacing="3.0">
+                    <Label style="-fx-font-size: 11; -fx-text-fill: #555555;
+                                  -fx-font-weight: bold;" text="DURASI" />
+                    <Label fx:id="durasiLabel"
+                           style="-fx-font-size: 15; -fx-font-weight: bold;
+                                  -fx-text-fill: #f5f5f5;"
+                           text="3 Hari 2 Malam" />
+                </VBox>
+
+                <Separator style="-fx-orientation: vertical;" />
+
+                <!-- [DB] SUM jumlah peserta -->
+                <VBox spacing="3.0">
+                    <Label style="-fx-font-size: 11; -fx-text-fill: #555555;
+                                  -fx-font-weight: bold;" text="PESERTA" />
+                    <Label fx:id="pesertaLabel"
+                           style="-fx-font-size: 15; -fx-font-weight: bold;
+                                  -fx-text-fill: #f5f5f5;"
+                           text="4 Orang" />
+                </VBox>
+            </HBox>
+        </VBox>
+    </top>
+
+    <!-- ============================================================
+         CENTER: TIMELINE KONTEN
+         ============================================================ -->
+    <center>
+        <ScrollPane fitToWidth="true" styleClass="scroll-pane">
+            <VBox spacing="20.0" style="-fx-padding: 36 50 20 50;">
+
+                <!-- DESKRIPSI PERJALANAN -->
+                <VBox spacing="10.0" styleClass="card">
+                    <Label style="-fx-font-size: 13; -fx-font-weight: bold;
+                                  -fx-text-fill: #DEFF9A;"
+                           text="Deskripsi Perjalanan" />
+                    <!-- [DB] itinerary.deskripsi -->
+                    <TextArea fx:id="deskripsiTextArea"
+                              prefHeight="72.0"
+                              style="-fx-control-inner-background: #222222;
+                                     -fx-text-fill: #DAFFDE; -fx-font-size: 13;
+                                     -fx-padding: 12; -fx-border-color: #2e2e2e;
+                                     -fx-border-radius: 10; -fx-background-radius: 10;"
+                              wrapText="true" />
+                </VBox>
+
+                <!-- TIMELINE HEADER -->
+                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                    <Label style="-fx-font-size: 15; -fx-font-weight: bold;
+                                  -fx-text-fill: #DEFF9A;"
+                           text="Jadwal Perjalanan" />
+                    <Region HBox.hgrow="ALWAYS" />
+                    <Label style="-fx-font-size: 12; -fx-text-fill: #555555;"
+                           text="Urutan berdasarkan waktu kunjungan" />
+                </HBox>
+
+                <!-- ================================================
+                     TIMELINE VBox
+                     [DB] Diisi oleh ItineraryPlannerController.loadTimeline()
+                     Query: SELECT id.*, d.nama, d.lokasi, d.harga
+                            FROM itinerary_detail id
+                            JOIN destinasi d ON d.id = id.destinasi_id
+                            WHERE id.itinerary_id = ?
+                            ORDER BY id.jam_kunjungan ASC
+
+                     Template satu item timeline (diulang per destinasi):
+                     Lihat komentar di dalam timelineVBox di bawah.
+                     ================================================ -->
+                <VBox fx:id="timelineVBox" spacing="0">
+
+                    <!--
+                    ==== TEMPLATE SATU TIMELINE ITEM ====
+                    Salin pola ini untuk setiap destinasi dalam itinerary:
+
+                    <HBox spacing="0" alignment="TOP_LEFT">
+                        Kolom 1: Badge Jam + Connector
+                        <VBox alignment="CENTER" spacing="0">
+                            <VBox alignment="CENTER" styleClass="timeline-time-badge"
+                                  prefWidth="70">
+                                <Label style="-fx-font-size: 15; -fx-font-weight: bold;
+                                              -fx-text-fill: #121212;" text="09:00" />
+                                <Label style="-fx-font-size: 9; -fx-text-fill: #121212;"
+                                       text="WIB" />
+                            </VBox>
+                            VBox connector (garis penghubung antar item):
+                            <VBox styleClass="timeline-connector"
+                                  prefWidth="2" VBox.vgrow="ALWAYS"
+                                  style="-fx-min-height: 20;" />
+                        </VBox>
+
+                        Kolom 2: Detail Card (dengan margin kiri)
+                        <VBox HBox.hgrow="ALWAYS" spacing="8.0"
+                              style="-fx-padding: 0 0 24 20;">
+                            <VBox styleClass="timeline-card" spacing="12.0">
+                                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                    <Label style="-fx-font-size: 16; -fx-font-weight: bold;
+                                                  -fx-text-fill: #f5f5f5;"
+                                           text="{destinasi.nama}" />
+                                    <Region HBox.hgrow="ALWAYS" />
+                                    [CONTROLLER] onAction="#handleHapusItem"
+                                    <Button styleClass="danger"
+                                            style="-fx-padding: 4 10; -fx-font-size: 11;"
+                                            text="Hapus" />
+                                </HBox>
+
+                                <Label styleClass="subtitle"
+                                       text="📍 {destinasi.lokasi}" />
+
+                                <HBox spacing="20.0">
+                                    <VBox spacing="4.0">
+                                        <Label style="-fx-font-size: 11; -fx-text-fill: #555555;
+                                                      -fx-font-weight: bold;" text="ESTIMASI JAM" />
+                                        <Label style="-fx-font-size: 13; -fx-font-weight: bold;
+                                                      -fx-text-fill: #f5f5f5;"
+                                               text="{id.estimasi_jam} jam" />
+                                    </VBox>
+                                    <VBox spacing="4.0">
+                                        <Label style="-fx-font-size: 11; -fx-text-fill: #555555;
+                                                      -fx-font-weight: bold;" text="HARGA TIKET" />
+                                        <Label styleClass="price-tag"
+                                               text="Rp {destinasi.harga}" />
+                                    </VBox>
+                                    <VBox spacing="4.0">
+                                        <Label style="-fx-font-size: 11; -fx-text-fill: #555555;
+                                                      -fx-font-weight: bold;" text="JUMLAH TIKET" />
+                                        <Label style="-fx-font-size: 13; -fx-font-weight: bold;
+                                                      -fx-text-fill: #f5f5f5;"
+                                               text="{id.jumlah_tiket} tiket" />
+                                    </VBox>
+                                </HBox>
+
+                                TextArea catatan opsional:
+                                <TextArea prefHeight="50"
+                                          promptText="Catatan untuk kunjungan ini..."
+                                          wrapText="true" />
+
+                                <HBox spacing="10.0">
+                                    [CONTROLLER] onAction="#handleLihatLokasi"
+                                    <Button style="-fx-padding: 7 14; -fx-font-size: 11;"
+                                            text="📍 Lihat Peta" />
+                                    [CONTROLLER] onAction="#handlePesanTiket"
+                                    <Button styleClass="secondary"
+                                            style="-fx-padding: 7 14; -fx-font-size: 11;"
+                                            text="🎫 Pesan Tiket" />
+                                </HBox>
+                            </VBox>
+                        </VBox>
+                    </HBox>
+                    =====================================
+                    -->
+
+                    <!-- === CONTOH ITEM 1: 09:00 === -->
+                    <HBox spacing="0" alignment="TOP_LEFT">
+                        <VBox alignment="CENTER" spacing="0" prefWidth="80.0">
+                            <VBox alignment="CENTER"
+                                  style="-fx-background-color: #DEFF9A;
+                                         -fx-border-radius: 12; -fx-background-radius: 12;
+                                         -fx-padding: 10 8; -fx-cursor: default;">
+                                <Label style="-fx-font-size: 16; -fx-font-weight: bold;
+                                              -fx-text-fill: #121212;" text="09:00" />
+                                <Label style="-fx-font-size: 9; -fx-text-fill: #121212;"
+                                       text="WIB" />
+                            </VBox>
+                            <VBox style="-fx-background-color: rgba(222,255,154,0.25);
+                                          -fx-min-width: 2; -fx-pref-width: 2;
+                                          -fx-min-height: 40;"
+                                  VBox.vgrow="ALWAYS" />
+                        </VBox>
+
+                        <VBox HBox.hgrow="ALWAYS" style="-fx-padding: 0 0 28 20;">
+                            <VBox styleClass="timeline-card" spacing="12.0">
+                                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                    <Label style="-fx-font-size: 16; -fx-font-weight: bold;
+                                                  -fx-text-fill: #f5f5f5;"
+                                           text="Candi Borobudur" />
+                                    <Region HBox.hgrow="ALWAYS" />
+                                    <Button styleClass="danger"
+                                            style="-fx-padding: 4 12; -fx-font-size: 11;"
+                                            text="Hapus" />
+                                </HBox>
+                                <Label styleClass="subtitle"
+                                       text="Magelang, Jawa Tengah" />
+                                <HBox spacing="24.0">
+                                    <VBox spacing="4.0">
+                                        <Label style="-fx-font-size: 10; -fx-text-fill: #555555;
+                                                      -fx-font-weight: bold;"
+                                               text="ESTIMASI JAM" />
+                                        <Label style="-fx-font-size: 13; -fx-font-weight: bold;
+                                                      -fx-text-fill: #f5f5f5;"
+                                               text="2 jam" />
+                                    </VBox>
+                                    <VBox spacing="4.0">
+                                        <Label style="-fx-font-size: 10; -fx-text-fill: #555555;
+                                                      -fx-font-weight: bold;"
+                                               text="HARGA TIKET" />
+                                        <Label styleClass="price-tag" text="Rp 50.000" />
+                                    </VBox>
+                                    <VBox spacing="4.0">
+                                        <Label style="-fx-font-size: 10; -fx-text-fill: #555555;
+                                                      -fx-font-weight: bold;"
+                                               text="JUMLAH TIKET" />
+                                        <Label style="-fx-font-size: 13; -fx-font-weight: bold;
+                                                      -fx-text-fill: #f5f5f5;"
+                                               text="4 tiket" />
+                                    </VBox>
+                                </HBox>
+                                <HBox spacing="10.0">
+                                    <Button style="-fx-padding: 7 14; -fx-font-size: 11;"
+                                            text="Lihat Peta" />
+                                    <Button styleClass="secondary"
+                                            style="-fx-padding: 7 14; -fx-font-size: 11;"
+                                            text="Pesan Tiket" />
+                                </HBox>
+                            </VBox>
+                        </VBox>
+                    </HBox>
+
+                    <!-- === CONTOH ITEM 2: 12:00 === -->
+                    <HBox spacing="0" alignment="TOP_LEFT">
+                        <VBox alignment="CENTER" spacing="0" prefWidth="80.0">
+                            <VBox alignment="CENTER"
+                                  style="-fx-background-color: #DEFF9A;
+                                         -fx-border-radius: 12; -fx-background-radius: 12;
+                                         -fx-padding: 10 8;">
+                                <Label style="-fx-font-size: 16; -fx-font-weight: bold;
+                                              -fx-text-fill: #121212;" text="12:00" />
+                                <Label style="-fx-font-size: 9; -fx-text-fill: #121212;"
+                                       text="WIB" />
+                            </VBox>
+                            <VBox style="-fx-background-color: rgba(222,255,154,0.25);
+                                          -fx-min-width: 2; -fx-pref-width: 2;
+                                          -fx-min-height: 40;"
+                                  VBox.vgrow="ALWAYS" />
+                        </VBox>
+
+                        <VBox HBox.hgrow="ALWAYS" style="-fx-padding: 0 0 28 20;">
+                            <VBox styleClass="timeline-card" spacing="12.0">
+                                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                    <Label style="-fx-font-size: 16; -fx-font-weight: bold;
+                                                  -fx-text-fill: #f5f5f5;"
+                                           text="Istirahat Makan Siang" />
+                                    <Region HBox.hgrow="ALWAYS" />
+                                    <Button styleClass="danger"
+                                            style="-fx-padding: 4 12; -fx-font-size: 11;"
+                                            text="Hapus" />
+                                </HBox>
+                                <Label styleClass="subtitle"
+                                       text="🍽️  Restoran Lokal — Muntilan" />
+                                <HBox spacing="24.0">
+                                    <VBox spacing="4.0">
+                                        <Label style="-fx-font-size: 10; -fx-text-fill: #555555;
+                                                      -fx-font-weight: bold;"
+                                               text="ESTIMASI JAM" />
+                                        <Label style="-fx-font-size: 13; -fx-font-weight: bold;
+                                                      -fx-text-fill: #f5f5f5;"
+                                               text="1,5 jam" />
+                                    </VBox>
+                                    <VBox spacing="4.0">
+                                        <Label style="-fx-font-size: 10; -fx-text-fill: #555555;
+                                                      -fx-font-weight: bold;"
+                                               text="ESTIMASI BIAYA" />
+                                        <Label styleClass="price-tag" text="Rp 30.000" />
+                                    </VBox>
+                                </HBox>
+                            </VBox>
+                        </VBox>
+                    </HBox>
+
+                    <!-- === CONTOH ITEM 3: 15:00 === -->
+                    <HBox spacing="0" alignment="TOP_LEFT">
+                        <VBox alignment="CENTER" spacing="0" prefWidth="80.0">
+                            <VBox alignment="CENTER"
+                                  style="-fx-background-color: #DEFF9A;
+                                         -fx-border-radius: 12; -fx-background-radius: 12;
+                                         -fx-padding: 10 8;">
+                                <Label style="-fx-font-size: 16; -fx-font-weight: bold;
+                                              -fx-text-fill: #121212;" text="15:00" />
+                                <Label style="-fx-font-size: 9; -fx-text-fill: #121212;"
+                                       text="WIB" />
+                            </VBox>
+                        </VBox>
+
+                        <VBox HBox.hgrow="ALWAYS" style="-fx-padding: 0 0 8 20;">
+                            <VBox styleClass="timeline-card" spacing="12.0">
+                                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                    <Label style="-fx-font-size: 16; -fx-font-weight: bold;
+                                                  -fx-text-fill: #f5f5f5;"
+                                           text="Prambanan Temple" />
+                                    <Region HBox.hgrow="ALWAYS" />
+                                    <Button styleClass="danger"
+                                            style="-fx-padding: 4 12; -fx-font-size: 11;"
+                                            text="Hapus" />
+                                </HBox>
+                                <Label styleClass="subtitle"
+                                       text="Sleman, DI Yogyakarta" />
+                                <HBox spacing="24.0">
+                                    <VBox spacing="4.0">
+                                        <Label style="-fx-font-size: 10; -fx-text-fill: #555555;
+                                                      -fx-font-weight: bold;"
+                                               text="ESTIMASI JAM" />
+                                        <Label style="-fx-font-size: 13; -fx-font-weight: bold;
+                                                      -fx-text-fill: #f5f5f5;"
+                                               text="2,5 jam" />
+                                    </VBox>
+                                    <VBox spacing="4.0">
+                                        <Label style="-fx-font-size: 10; -fx-text-fill: #555555;
+                                                      -fx-font-weight: bold;"
+                                               text="HARGA TIKET" />
+                                        <Label styleClass="price-tag" text="Rp 75.000" />
+                                    </VBox>
+                                    <VBox spacing="4.0">
+                                        <Label style="-fx-font-size: 10; -fx-text-fill: #555555;
+                                                      -fx-font-weight: bold;"
+                                               text="JUMLAH TIKET" />
+                                        <Label style="-fx-font-size: 13; -fx-font-weight: bold;
+                                                      -fx-text-fill: #f5f5f5;"
+                                               text="4 tiket" />
+                                    </VBox>
+                                </HBox>
+                                <HBox spacing="10.0">
+                                    <Button style="-fx-padding: 7 14; -fx-font-size: 11;"
+                                            text="Lihat Peta" />
+                                    <Button styleClass="secondary"
+                                            style="-fx-padding: 7 14; -fx-font-size: 11;"
+                                            text="Pesan Tiket" />
+                                </HBox>
+                            </VBox>
+                        </VBox>
+                    </HBox>
+
+                </VBox>
+
+                <!-- TOMBOL TAMBAH ITEM -->
+                <Button styleClass="secondary"
+                        style="-fx-padding: 14 30; -fx-font-size: 13;
+                               -fx-border-style: dashed; -fx-border-color: #333333;
+                               -fx-border-width: 2; -fx-border-radius: 12;
+                               -fx-background-radius: 12;"
+                        text="Tambah Destinasi ke Itinerary" />
+
+                <Region style="-fx-min-height: 20;" />
+            </VBox>
+        </ScrollPane>
+    </center>
+
+    <!-- ============================================================
+         BOTTOM: SUMMARY & ACTIONS
+         ============================================================ -->
+    <bottom>
+        <VBox spacing="16.0" styleClass="action-footer">
+
+            <HBox spacing="32.0" alignment="CENTER_LEFT">
+
+                <!-- ESTIMASI BIAYA TOTAL -->
+                <VBox spacing="6.0">
+                    <Label style="-fx-font-size: 12; -fx-text-fill: #DAFFDE;"
+                           text="Estimasi Biaya Perjalanan Total" />
+                    <HBox spacing="12.0" alignment="CENTER_LEFT">
+                        <!--
+                        [DB] SUM(d.harga * id.jumlah_tiket)
+                             FROM itinerary_detail id JOIN destinasi d ON d.id = id.destinasi_id
+                             WHERE id.itinerary_id = ?
+                        -->
+                        <Label fx:id="totalBiayaLabel"
+                               style="-fx-font-size: 30; -fx-font-weight: bold;
+                                      -fx-text-fill: #DEFF9A;"
+                               text="Rp 500.000" />
+                        <Label style="-fx-font-size: 13; -fx-text-fill: #555555;
+                                      -fx-padding: 8 0;"
+                               text="untuk 4 orang" />
+                    </HBox>
+                </VBox>
+
+                <!-- RINCIAN BIAYA -->
+                <VBox spacing="4.0"
+                      style="-fx-padding: 12 20; -fx-background-color: #1a1a1a;
+                             -fx-border-radius: 10; -fx-background-radius: 10;
+                             -fx-border-color: #2e2e2e; -fx-border-width: 1;">
+                    <Label style="-fx-font-size: 11; -fx-font-weight: bold;
+                                  -fx-text-fill: #DEFF9A;" text="Rincian:" />
+                    <Label style="-fx-font-size: 11; -fx-text-fill: #888888;"
+                           text="Tiket Destinasi  :  Rp 400.000" />
+                    <Label style="-fx-font-size: 11; -fx-text-fill: #888888;"
+                           text="Estimasi Makan   :  Rp 100.000" />
+                </VBox>
+
+                <Region HBox.hgrow="ALWAYS" />
+
+                <!-- ACTION BUTTONS -->
+                <VBox spacing="10.0" alignment="CENTER_RIGHT">
+                    <!-- [CONTROLLER] onAction="#handleSimpan" → UPDATE itinerary -->
+                    <Button style="-fx-padding: 13 36; -fx-font-size: 14;
+                                   -fx-font-weight: bold; -fx-background-color: #DEFF9A;
+                                   -fx-text-fill: #121212; -fx-border-radius: 15;
+                                   -fx-background-radius: 15;"
+                            text="Simpan Rencana" onAction="#handleSimpan" />
+                    <!-- [CONTROLLER] onAction="#handleBagikan" → share kode unik -->
+                    <Button styleClass="secondary"
+                            style="-fx-padding: 10 36; -fx-font-size: 13;
+                                   -fx-font-weight: bold;"
+                            text="Bagikan ke Teman" onAction="#handleBagikan" />
+                </VBox>
+            </HBox>
+
+            <Separator />
+
+            <!-- KODE UNDANGAN & INFO BAWAH -->
+            <HBox spacing="40.0">
+                <!-- [DB] itinerary.kode_unik (UUID pendek) -->
+                <VBox spacing="5.0">
+                    <Label style="-fx-font-size: 11; -fx-font-weight: bold;
+                                  -fx-text-fill: #DEFF9A;"
+                           text="Kode Undangan:" />
+                    <HBox spacing="10.0">
+                        <TextField editable="false"
+                                   fx:id="kodeUndanganField"
+                                   prefWidth="180.0"
+                                   style="-fx-font-size: 13; -fx-font-weight: bold;
+                                          -fx-control-inner-background: #1e1e1e;
+                                          -fx-border-color: #333333;"
+                                   text="TRIP2024ABC" />
+                        <!-- [CONTROLLER] onAction="#handleCopyKode" -->
+                        <Button style="-fx-padding: 8 14; -fx-font-size: 11;"
+                                text="Salin" onAction="#handleCopyKode" />
+                    </HBox>
+                </VBox>
+
+                <VBox spacing="5.0">
+                    <Label style="-fx-font-size: 11; -fx-font-weight: bold;
+                                  -fx-text-fill: #DEFF9A;" text="Peserta:" />
+                    <Label fx:id="pesertaDetailLabel"
+                           style="-fx-font-size: 13; -fx-text-fill: #DAFFDE;"
+                           text="4 orang (2 Dewasa, 2 Anak-anak)" />
+                </VBox>
+
+                <VBox spacing="5.0">
+                    <Label style="-fx-font-size: 11; -fx-font-weight: bold;
+                                  -fx-text-fill: #DEFF9A;" text="Terakhir Diperbarui:" />
+                    <!-- [DB] itinerary.updated_at -->
+                    <Label fx:id="lastUpdateLabel"
+                           style="-fx-font-size: 13; -fx-text-fill: #DAFFDE;"
+                           text="09 Juni 2024, 13:30 WIB" />
+                </VBox>
+            </HBox>
+
+        </VBox>
+    </bottom>
+
+</BorderPane>
