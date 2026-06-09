@@ -5,6 +5,8 @@
 -- ============================================================
 
 -- Drop existing tables if they exist
+DROP TABLE IF EXISTS ulasan CASCADE;
+DROP TABLE IF EXISTS wishlist CASCADE;
 DROP TABLE IF EXISTS pesanan CASCADE;
 DROP TABLE IF EXISTS itinerary_detail CASCADE;
 DROP TABLE IF EXISTS itinerary CASCADE;
@@ -110,15 +112,45 @@ CREATE INDEX idx_itinerary_detail_itinerary_id ON itinerary_detail(itinerary_id)
 CREATE INDEX idx_itinerary_detail_destinasi_id ON itinerary_detail(destinasi_id);
 
 -- ============================================================
+-- TABEL WISHLIST - Menyimpan destinasi favorit pengguna
+-- ============================================================
+CREATE TABLE wishlist (
+    id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL,
+    destinasi_id INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (destinasi_id) REFERENCES destinasi(id) ON DELETE CASCADE,
+    UNIQUE(user_id, destinasi_id)
+);
+CREATE INDEX idx_wishlist_user_id ON wishlist(user_id);
+
+-- ============================================================
+-- TABEL ULASAN - Menyimpan ulasan pengguna terhadap destinasi
+-- ============================================================
+CREATE TABLE ulasan (
+    id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL,
+    destinasi_id INT NOT NULL,
+    rating INT NOT NULL CHECK (rating BETWEEN 1 AND 5),
+    komentar TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (destinasi_id) REFERENCES destinasi(id) ON DELETE CASCADE
+);
+CREATE INDEX idx_ulasan_destinasi_id ON ulasan(destinasi_id);
+
+-- ============================================================
 -- INSERT DATA SAMPLE
 -- ============================================================
 
 -- Sample Users
+-- The following users use SHA-256 hash for password 'admin': 8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918
 INSERT INTO users (username, password, role, nama_lengkap, email, no_telepon) VALUES
-('admin', 'admin', 'Admin', 'Administrator', 'admin@wisata.com', '081234567890'),
-('pengelola01', 'admin', 'Pengelola', 'Pengelola Wisata', 'pengelola@wisata.com', '082345678901'),
-('wisatawan01', 'admin', 'Wisatawan', 'Budi Santoso', 'budi@email.com', '083456789012'),
-('wisatawan02', 'admin', 'Wisatawan', 'Siti Nurhaliza', 'siti@email.com', '084567890123');
+('admin', '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', 'Admin', 'Administrator', 'admin@wisata.com', '081234567890'),
+('pengelola01', '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', 'Pengelola', 'Pengelola Wisata', 'pengelola@wisata.com', '082345678901'),
+('wisatawan01', '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', 'Wisatawan', 'Budi Santoso', 'budi@email.com', '083456789012'),
+('wisatawan02', '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', 'Wisatawan', 'Siti Nurhaliza', 'siti@email.com', '084567890123');
 
 -- Sample Destinasi (Wisata Indonesia)
 INSERT INTO destinasi (nama, kategori, harga, deskripsi, koordinat, lokasi, rating) VALUES
@@ -132,7 +164,7 @@ INSERT INTO destinasi (nama, kategori, harga, deskripsi, koordinat, lokasi, rati
 ('Kawah Putih', 'Alam', 100000, 'Danau kawah dengan air berwarna putih yang unik', '-6.8970,107.3570', 'Bandung, Jawa Barat', 4.4);
 
 -- ============================================================
--- KETERANGAN PASSWORD SAMPLE (Plain Text):
+-- KETERANGAN PASSWORD SAMPLE (SHA-256):
 -- Username: admin, pengelola01, wisatawan01, wisatawan02
--- Password: 'admin' (Plain Text)
+-- Password: 'admin'
 -- ============================================================

@@ -351,4 +351,125 @@ public class DataService {
         }
         return 0;
     }
+
+    // ============================================================
+    // FITUR WISHLIST
+    // ============================================================
+
+    public static boolean isWishlisted(int userId, int destinasiId) {
+        String sql = "SELECT id FROM wishlist WHERE user_id = ? AND destinasi_id = ?";
+        try (Connection conn = DatabaseHelper.getInstance().getConnection()) {
+            if (conn == null) return false;
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setInt(1, userId);
+                ps.setInt(2, destinasiId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    return rs.next();
+                }
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Gagal mengecek wishlist", e);
+        }
+        return false;
+    }
+
+    public static boolean toggleWishlist(int userId, int destinasiId) {
+        if (isWishlisted(userId, destinasiId)) {
+            String sql = "DELETE FROM wishlist WHERE user_id = ? AND destinasi_id = ?";
+            try (Connection conn = DatabaseHelper.getInstance().getConnection();
+                 PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setInt(1, userId);
+                ps.setInt(2, destinasiId);
+                ps.executeUpdate();
+                return false; // Removed
+            } catch (SQLException e) {
+                LOGGER.log(Level.SEVERE, "Gagal menghapus wishlist", e);
+            }
+        } else {
+            String sql = "INSERT INTO wishlist (user_id, destinasi_id) VALUES (?, ?)";
+            try (Connection conn = DatabaseHelper.getInstance().getConnection();
+                 PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setInt(1, userId);
+                ps.setInt(2, destinasiId);
+                ps.executeUpdate();
+                return true; // Added
+            } catch (SQLException e) {
+                LOGGER.log(Level.SEVERE, "Gagal menambah wishlist", e);
+            }
+        }
+        return false;
+    }
+
+    public static List<Destinasi> getWishlistDestinasi(int userId) {
+        List<Destinasi> result = new ArrayList<>();
+        String sql = "SELECT d.id, d.nama, d.kategori, d.harga, d.deskripsi, d.koordinat, d.lokasi, d.rating, d.gambar_url " +
+                     "FROM destinasi d " +
+                     "JOIN wishlist w ON w.destinasi_id = d.id " +
+                     "WHERE w.user_id = ? ORDER BY w.created_at DESC";
+
+        try (Connection conn = DatabaseHelper.getInstance().getConnection()) {
+            if (conn == null) return result;
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setInt(1, userId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        result.add(mapDestinasi(rs));
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Gagal memuat wishlist", e);
+        }
+        return result;
+    }
+
+    // ============================================================
+    // FITUR ULASAN
+    // ============================================================
+
+    public static class Ulasan {
+        public String namaUser;
+        public int rating;
+        public String komentar;
+        public String tanggal;
+    }
+
+    public static boolean addUlasan(int userId, int destinasiId, int rating, String komentar) {
+        String sql = "INSERT INTO ulasan (user_id, destinasi_id, rating, komentar) VALUES (?, ?, ?, ?)";
+        try (Connection conn = DatabaseHelper.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ps.setInt(2, destinasiId);
+            ps.setInt(3, rating);
+            ps.setString(4, komentar);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Gagal menyimpan ulasan", e);
+        }
+        return false;
+    }
+
+    public static List<Ulasan> getUlasanByDestinasi(int destinasiId) {
+        List<Ulasan> list = new ArrayList<>();
+        String sql = "SELECT u.rating, u.komentar, u.created_at, usr.nama_lengkap " +
+                     "FROM ulasan u JOIN users usr ON u.user_id = usr.id " +
+                     "WHERE u.destinasi_id = ? ORDER BY u.created_at DESC";
+        try (Connection conn = DatabaseHelper.getInstance().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, destinasiId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Ulasan u = new Ulasan();
+                    u.rating = rs.getInt("rating");
+                    u.komentar = rs.getString("komentar");
+                    u.namaUser = rs.getString("nama_lengkap");
+                    u.tanggal = rs.getTimestamp("created_at").toLocalDateTime().format(DateTimeFormatter.ofPattern("dd MMM yyyy"));
+                    list.add(u);
+                }
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Gagal memuat ulasan", e);
+        }
+        return list;
+    }
 }

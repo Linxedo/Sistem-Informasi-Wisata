@@ -33,6 +33,9 @@ public class HomeController implements Initializable {
     @FXML private ComboBox<String> hargaFilter;
     @FXML private Button resetFilterButton;
 
+    @FXML private Label sectionTitle;
+    @FXML private Label sectionSubtitle;
+
     @FXML private FlowPane destinationFlowPane;
     @FXML private FlowPane categoryFlowPane;
 
@@ -73,6 +76,9 @@ public class HomeController implements Initializable {
 
     private void loadDestinations() {
         destinationFlowPane.getChildren().clear();
+        
+        if (sectionTitle != null) sectionTitle.setText("Top Destination");
+        if (sectionSubtitle != null) sectionSubtitle.setText("Destinasi paling populer dan direkomendasikan untuk kamu");
 
         String keyword = searchField.getText() != null ? searchField.getText().trim() : "";
         String kategori = kategoriFilter.getValue();
@@ -84,7 +90,7 @@ public class HomeController implements Initializable {
 
         if (destinasiList.isEmpty()) {
             Label empty = new Label("Tidak ada destinasi yang cocok dengan filter.");
-            empty.setStyle("-fx-text-fill: #888888; -fx-font-size: 14; -fx-padding: 40;");
+            empty.setStyle("-fx-text-fill: #64748b; -fx-font-size: 14; -fx-padding: 40;");
             destinationFlowPane.getChildren().add(empty);
             return;
         }
@@ -216,13 +222,14 @@ public class HomeController implements Initializable {
     private void handleLogin() {
         User user = LoginController.getCurrentUser();
         if (user != null) {
-            try {
-                App.setRoot("dashboard", (DashboardController c) -> {
-                    c.setCurrentUser(user);
-                    c.loadDestinations();
-                });
-            } catch (Exception e) {
-                showError("Error", "Gagal membuka dashboard.");
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Konfirmasi Logout");
+            alert.setHeaderText(null);
+            alert.setContentText("Apakah Anda yakin ingin keluar?");
+            if (alert.showAndWait().orElse(javafx.scene.control.ButtonType.CANCEL) == javafx.scene.control.ButtonType.OK) {
+                LoginController.setCurrentUser(null);
+                updateProfileButton();
+                showInfo("Logout", "Anda telah berhasil keluar.");
             }
         } else {
             try {
@@ -244,7 +251,31 @@ public class HomeController implements Initializable {
 
     @FXML
     private void handleNavWishlist() {
-        showInfo("Wishlist", "Fitur wishlist akan segera hadir. Simpan destinasi favorit Anda di sini.");
+        User user = LoginController.getCurrentUser();
+        if (user == null) {
+            showInfo("Login Diperlukan", "Silakan login untuk mengakses Wishlist Anda.");
+            try {
+                App.setRoot("login");
+            } catch (Exception e) {
+                showError("Error", "Gagal membuka halaman login.");
+            }
+            return;
+        }
+        
+        destinationFlowPane.getChildren().clear();
+        if (sectionTitle != null) sectionTitle.setText("Wishlist Anda");
+        if (sectionSubtitle != null) sectionSubtitle.setText("Destinasi yang Anda simpan sebagai favorit");
+
+        List<Destinasi> wishlist = DataService.getWishlistDestinasi(user.getId());
+        if (wishlist.isEmpty()) {
+            Label empty = new Label("Belum ada destinasi di wishlist Anda.");
+            empty.setStyle("-fx-text-fill: #64748b; -fx-font-size: 14; -fx-padding: 40;");
+            destinationFlowPane.getChildren().add(empty);
+        } else {
+            for (Destinasi d : wishlist) {
+                destinationFlowPane.getChildren().add(createDestinationCard(d));
+            }
+        }
     }
 
     private void showError(String title, String message) {

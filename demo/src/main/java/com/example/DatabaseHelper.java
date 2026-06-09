@@ -90,7 +90,12 @@ public class DatabaseHelper {
     public Connection getConnection() {
         Connection connection = null;
         try {
-            connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+            java.util.Properties props = new java.util.Properties();
+            props.setProperty("user", DB_USER);
+            props.setProperty("password", DB_PASSWORD);
+            props.setProperty("connectTimeout", "5");
+            props.setProperty("socketTimeout", "10");
+            connection = DriverManager.getConnection(DB_URL, props);
             LOGGER.log(Level.INFO, "Koneksi database berhasil");
             return connection;
         } catch (SQLException e) {
@@ -124,7 +129,7 @@ public class DatabaseHelper {
      * Membuat tabel yang dibutuhkan aplikasi jika belum ada.
      */
     private void ensureRequiredTables(Connection conn) {
-        String sql = "CREATE TABLE IF NOT EXISTS pesanan (" +
+        String sqlPesanan = "CREATE TABLE IF NOT EXISTS pesanan (" +
                 "id SERIAL PRIMARY KEY, " +
                 "user_id INT REFERENCES users(id) ON DELETE SET NULL, " +
                 "destinasi_id INT NOT NULL REFERENCES destinasi(id) ON DELETE CASCADE, " +
@@ -141,11 +146,40 @@ public class DatabaseHelper {
                 "status VARCHAR(20) DEFAULT 'Pending', " +
                 "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
                 ")";
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (PreparedStatement pstmt = conn.prepareStatement(sqlPesanan)) {
             pstmt.execute();
             LOGGER.log(Level.INFO, "Tabel pesanan siap digunakan");
         } catch (SQLException e) {
             LOGGER.log(Level.WARNING, "Gagal membuat tabel pesanan: " + e.getMessage());
+        }
+
+        String sqlWishlist = "CREATE TABLE IF NOT EXISTS wishlist (" +
+                "id SERIAL PRIMARY KEY, " +
+                "user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE, " +
+                "destinasi_id INT NOT NULL REFERENCES destinasi(id) ON DELETE CASCADE, " +
+                "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, " +
+                "UNIQUE(user_id, destinasi_id)" +
+                ")";
+        try (PreparedStatement pstmt = conn.prepareStatement(sqlWishlist)) {
+            pstmt.execute();
+            LOGGER.log(Level.INFO, "Tabel wishlist siap digunakan");
+        } catch (SQLException e) {
+            LOGGER.log(Level.WARNING, "Gagal membuat tabel wishlist: " + e.getMessage());
+        }
+
+        String sqlUlasan = "CREATE TABLE IF NOT EXISTS ulasan (" +
+                "id SERIAL PRIMARY KEY, " +
+                "user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE, " +
+                "destinasi_id INT NOT NULL REFERENCES destinasi(id) ON DELETE CASCADE, " +
+                "rating INT NOT NULL CHECK (rating BETWEEN 1 AND 5), " +
+                "komentar TEXT, " +
+                "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
+                ")";
+        try (PreparedStatement pstmt = conn.prepareStatement(sqlUlasan)) {
+            pstmt.execute();
+            LOGGER.log(Level.INFO, "Tabel ulasan siap digunakan");
+        } catch (SQLException e) {
+            LOGGER.log(Level.WARNING, "Gagal membuat tabel ulasan: " + e.getMessage());
         }
     }
 

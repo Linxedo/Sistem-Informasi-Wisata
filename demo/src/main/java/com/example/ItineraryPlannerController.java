@@ -257,10 +257,16 @@ public class ItineraryPlannerController implements Initializable {
                 "Buka Dashboard setelah login, pilih destinasi, lalu klik 'Tambah ke Itinerary'.");
         try {
             if (currentUser != null) {
-                App.setRoot("dashboard", (DashboardController c) -> {
-                    c.setCurrentUser(currentUser);
-                    c.loadDestinations();
-                });
+                if ("Pengelola".equalsIgnoreCase(currentUser.getRole())) {
+                    App.setRoot("pengelola_dashboard", (PengelolaDashboardController c) -> {
+                        c.setCurrentUser(currentUser);
+                        c.loadDestinations();
+                    });
+                } else if ("Admin".equalsIgnoreCase(currentUser.getRole())) {
+                    App.setRoot("admin_dashboard");
+                } else {
+                    App.setRoot("home");
+                }
             } else {
                 App.setRoot("login");
             }

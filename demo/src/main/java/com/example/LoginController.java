@@ -311,10 +311,15 @@ public class LoginController {
      * @throws IOException jika gagal load FXML
      */
     private void openDashboard(User user) throws IOException {
-        App.setRoot("dashboard", (DashboardController controller) -> {
-            controller.setCurrentUser(user);
-            controller.loadDestinations();
-        });
+        String role = user.getRole();
+        if ("Admin".equalsIgnoreCase(role)) {
+            App.setRoot("admin_dashboard");
+        } else if ("Pengelola".equalsIgnoreCase(role)) {
+            App.setRoot("pengelola_dashboard");
+        } else {
+            // Wisatawan to home instead
+            App.setRoot("home");
+        }
     }
 
     /**

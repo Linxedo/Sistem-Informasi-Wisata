@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane prefHeight="760.0" prefWidth="1280.0"
+            styleClass="root"
+            stylesheets="@style.css"
+            xmlns="http://javafx.com/javafx/19"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.AdminDashboardController">
+
+    <!-- ╔══════════════════════════════════════╗
+         ║           SIDEBAR KIRI               ║
+         ╚══════════════════════════════════════╝ -->
+    <left>
+        <VBox prefWidth="230.0" style="-fx-background-color: #1e293b; -fx-padding: 0;">
+
+            <!-- Logo -->
+            <VBox style="-fx-background-color: #0f172a; -fx-padding: 26 22 22 22;">
+                <Label text="🗺  WisataApp"
+                       style="-fx-font-size: 19; -fx-font-weight: bold; -fx-text-fill: #38bdf8;"/>
+                <Label text="Portal Admin"
+                       style="-fx-font-size: 11; -fx-text-fill: #475569; -fx-padding: 3 0 0 2;"/>
+            </VBox>
+
+            <!-- Info User -->
+            <VBox style="-fx-background-color: #162032; -fx-padding: 14 18; -fx-border-color: #334155; -fx-border-width: 1 0;">
+                <Label text="🛡️  Administrator"
+                       style="-fx-font-size: 10; -fx-text-fill: #475569;"/>
+                <Label fx:id="welcomeLabel" text="Selamat Datang"
+                       style="-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: #e2e8f0;
+                              -fx-wrap-text: true; -fx-padding: 2 0 0 0;"/>
+            </VBox>
+
+            <Label text="  PANEL KONTROL"
+                   style="-fx-font-size: 10; -fx-font-weight: bold; -fx-text-fill: #334155; -fx-padding: 18 14 6 14;"/>
+
+            <!-- Nav Destinasi -->
+            <HBox alignment="CENTER_LEFT" spacing="10"
+                  style="-fx-background-color: #1d4ed8; -fx-padding: 12 18; -fx-cursor: hand;">
+                <Label text="📋" style="-fx-font-size: 13;"/>
+                <Label text="Manajemen Destinasi"
+                       style="-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: #ffffff;"/>
+            </HBox>
+
+            <!-- Nav Pengguna -->
+            <HBox alignment="CENTER_LEFT" spacing="10"
+                  style="-fx-padding: 12 18; -fx-cursor: hand;">
+                <Label text="👥" style="-fx-font-size: 13;"/>
+                <Label text="Manajemen Pengguna"
+                       style="-fx-font-size: 13; -fx-text-fill: #94a3b8;"/>
+            </HBox>
+
+            <Region VBox.vgrow="ALWAYS"/>
+            <Separator/>
+            <Button text="🚪  Keluar" onAction="#handleLogout" maxWidth="Infinity"
+                    style="-fx-font-size: 13; -fx-font-weight: bold; -fx-padding: 13 18;
+                           -fx-background-color: transparent; -fx-text-fill: #f87171;
+                           -fx-cursor: hand; -fx-alignment: CENTER_LEFT;
+                           -fx-border-color: transparent; -fx-background-radius: 0;"/>
+        </VBox>
+    </left>
+
+    <!-- ╔══════════════════════════════════════╗
+         ║           KONTEN UTAMA               ║
+         ╚══════════════════════════════════════╝ -->
+    <center>
+        <VBox style="-fx-background-color: #0f172a;">
+
+            <!-- Top bar -->
+            <HBox alignment="CENTER_LEFT"
+                  style="-fx-padding: 16 24; -fx-background-color: #1e293b;
+                         -fx-border-color: #334155; -fx-border-width: 0 0 1 0;">
+                <VBox spacing="2">
+                    <Label text="Panel Administrasi"
+                           style="-fx-font-size: 17; -fx-font-weight: bold; -fx-text-fill: #e2e8f0;"/>
+                    <Label text="Kelola destinasi wisata dan akun pengguna"
+                           style="-fx-font-size: 11; -fx-text-fill: #64748b;"/>
+                </VBox>
+            </HBox>
+
+            <!-- TAB PANE -->
+            <TabPane tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
+
+                <!-- ══════════════════════════
+                     TAB 1: DESTINASI
+                ══════════════════════════ -->
+                <Tab text="📋  Destinasi">
+                    <VBox spacing="0" style="-fx-background-color: #0f172a;">
+
+                        <!-- Sub-header Destinasi -->
+                        <HBox alignment="CENTER_LEFT" spacing="14"
+                              style="-fx-padding: 14 20; -fx-background-color: #1e293b;
+                                     -fx-border-color: #334155; -fx-border-width: 0 0 1 0;">
+                            <TextField fx:id="searchField" prefWidth="220.0"
+                                       promptText="🔍  Cari nama / lokasi..."
+                                       style="-fx-font-size: 12; -fx-padding: 8 12;
+                                              -fx-background-color: #0f172a; -fx-text-fill: #e2e8f0;
+                                              -fx-prompt-text-fill: #475569;
+                                              -fx-border-color: #334155; -fx-border-radius: 8; -fx-background-radius: 8;"/>
+                            <ComboBox fx:id="kategoriFilter" prefWidth="150.0" promptText="Semua Kategori"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Label text="Klik baris tabel untuk mengedit →"
+                                   style="-fx-font-size: 11; -fx-text-fill: #475569;"/>
+                        </HBox>
+
+                        <HBox spacing="16" VBox.vgrow="ALWAYS" style="-fx-padding: 18;">
+
+                            <!-- Tabel Destinasi -->
+                            <VBox spacing="0" HBox.hgrow="ALWAYS"
+                                  style="-fx-background-color: #1e293b; -fx-background-radius: 10;
+                                         -fx-border-color: #334155; -fx-border-radius: 10; -fx-border-width: 1;">
+                                <HBox style="-fx-padding: 12 16; -fx-border-color: #334155; -fx-border-width: 0 0 1 0;">
+                                    <Label text="📋  Daftar Destinasi"
+                                           style="-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: #cbd5e1;"/>
+                                </HBox>
+                                <TableView fx:id="destinationTable" VBox.vgrow="ALWAYS">
+                                    <columns>
+                                        <TableColumn fx:id="idColumn"       prefWidth="50"  text="ID"/>
+                                        <TableColumn fx:id="namaColumn"     prefWidth="220" text="Nama Destinasi"/>
+                                        <TableColumn fx:id="kategoriColumn" prefWidth="130" text="Kategori"/>
+                                        <TableColumn fx:id="hargaColumn"    prefWidth="115" text="Harga (Rp)"/>
+                                        <TableColumn fx:id="ratingColumn"   prefWidth="80"  text="⭐ Rating"/>
+                                    </columns>
+                                    <columnResizePolicy>
+                                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                                    </columnResizePolicy>
+                                </TableView>
+                            </VBox>
+
+                            <!-- Form Destinasi -->
+                            <VBox spacing="12" prefWidth="290.0"
+                                  style="-fx-background-color: #1e293b; -fx-background-radius: 10;
+                                         -fx-border-color: #334155; -fx-border-radius: 10; -fx-border-width: 1;
+                                         -fx-padding: 16;">
+                                <Label text="✏️  Form Destinasi"
+                                       style="-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: #e2e8f0;"/>
+                                <Separator/>
+
+                                <VBox spacing="4">
+                                    <Label text="Nama Destinasi" style="-fx-font-size: 11; -fx-font-weight: bold; -fx-text-fill: #64748b;"/>
+                                    <TextField fx:id="formNama" promptText="Nama tempat wisata..."/>
+                                </VBox>
+                                <VBox spacing="4">
+                                    <Label text="Kategori" style="-fx-font-size: 11; -fx-font-weight: bold; -fx-text-fill: #64748b;"/>
+                                    <ComboBox fx:id="formKategori" maxWidth="Infinity"/>
+                                </VBox>
+                                <HBox spacing="10">
+                                    <VBox spacing="4" HBox.hgrow="ALWAYS">
+                                        <Label text="Harga (Rp)" style="-fx-font-size: 11; -fx-font-weight: bold; -fx-text-fill: #64748b;"/>
+                                        <TextField fx:id="formHarga" promptText="50000"/>
+                                    </VBox>
+                                    <VBox spacing="4" HBox.hgrow="ALWAYS">
+                                        <Label text="Rating" style="-fx-font-size: 11; -fx-font-weight: bold; -fx-text-fill: #64748b;"/>
+                                        <TextField fx:id="formRating" promptText="4.5"/>
+                                    </VBox>
+                                </HBox>
+                                <VBox spacing="4">
+                                    <Label text="Lokasi" style="-fx-font-size: 11; -fx-font-weight: bold; -fx-text-fill: #64748b;"/>
+                                    <TextField fx:id="formLokasi" promptText="Kota / Provinsi"/>
+                                </VBox>
+                                <VBox spacing="4" VBox.vgrow="ALWAYS">
+                                    <Label text="Deskripsi" style="-fx-font-size: 11; -fx-font-weight: bold; -fx-text-fill: #64748b;"/>
+                                    <TextArea fx:id="formDeskripsi" prefHeight="80" wrapText="true"
+                                              promptText="Deskripsi singkat..."/>
+                                </VBox>
+
+                                <Region VBox.vgrow="ALWAYS"/>
+
+                                <HBox spacing="8">
+                                    <Button fx:id="btnSimpan" text="＋ Simpan" onAction="#handleSimpan"
+                                            HBox.hgrow="ALWAYS" maxWidth="Infinity"
+                                            style="-fx-background-color: #22c55e; -fx-text-fill: white;
+                                                   -fx-font-weight: bold; -fx-padding: 9; -fx-background-radius: 8;
+                                                   -fx-cursor: hand; -fx-border-color: transparent;"/>
+                                    <Button fx:id="btnUpdate" text="✎ Ubah" onAction="#handleUpdate"
+                                            HBox.hgrow="ALWAYS" maxWidth="Infinity"
+                                            style="-fx-background-color: #3b82f6; -fx-text-fill: white;
+                                                   -fx-font-weight: bold; -fx-padding: 9; -fx-background-radius: 8;
+                                                   -fx-cursor: hand; -fx-border-color: transparent;"/>
+                                    <Button fx:id="btnHapus" text="✕ Hapus" onAction="#handleHapus"
+                                            HBox.hgrow="ALWAYS" maxWidth="Infinity"
+                                            style="-fx-background-color: #ef4444; -fx-text-fill: white;
+                                                   -fx-font-weight: bold; -fx-padding: 9; -fx-background-radius: 8;
+                                                   -fx-cursor: hand; -fx-border-color: transparent;"/>
+                                </HBox>
+                                <Button text="↺  Bersihkan" onAction="#handleClearForm" maxWidth="Infinity"
+                                        style="-fx-background-color: #334155; -fx-text-fill: #94a3b8;
+                                               -fx-padding: 9; -fx-background-radius: 8;
+                                               -fx-cursor: hand; -fx-border-color: transparent;"/>
+                            </VBox>
+                        </HBox>
+                    </VBox>
+                </Tab>
+
+                <!-- ══════════════════════════
+                     TAB 2: PENGGUNA
+                ══════════════════════════ -->
+                <Tab text="👥  Pengguna">
+                    <VBox spacing="0" style="-fx-background-color: #0f172a;">
+
+                        <!-- Sub-header Pengguna -->
+                        <HBox alignment="CENTER_LEFT" spacing="14"
+                              style="-fx-padding: 14 20; -fx-background-color: #1e293b;
+                                     -fx-border-color: #334155; -fx-border-width: 0 0 1 0;">
+                            <TextField fx:id="searchUserField" prefWidth="220.0"
+                                       promptText="🔍  Cari nama / username..."
+                                       style="-fx-font-size: 12; -fx-padding: 8 12;
+                                              -fx-background-color: #0f172a; -fx-text-fill: #e2e8f0;
+                                              -fx-prompt-text-fill: #475569;
+                                              -fx-border-color: #334155; -fx-border-radius: 8; -fx-background-radius: 8;"/>
+                            <ComboBox fx:id="roleFilter" prefWidth="150.0" promptText="Semua Role"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Label text="Klik baris tabel untuk mengedit →"
+                                   style="-fx-font-size: 11; -fx-text-fill: #475569;"/>
+                        </HBox>
+
+                        <HBox spacing="16" VBox.vgrow="ALWAYS" style="-fx-padding: 18;">
+
+                            <!-- Tabel Pengguna -->
+                            <VBox spacing="0" HBox.hgrow="ALWAYS"
+                                  style="-fx-background-color: #1e293b; -fx-background-radius: 10;
+                                         -fx-border-color: #334155; -fx-border-radius: 10; -fx-border-width: 1;">
+                                <HBox style="-fx-padding: 12 16; -fx-border-color: #334155; -fx-border-width: 0 0 1 0;">
+                                    <Label text="👥  Daftar Pengguna"
+                                           style="-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: #cbd5e1;"/>
+                                </HBox>
+                                <TableView fx:id="userTable" VBox.vgrow="ALWAYS">
+                                    <columns>
+                                        <TableColumn fx:id="userIdColumn"   prefWidth="50"  text="ID"/>
+                                        <TableColumn fx:id="usernameColumn" prefWidth="140" text="Username"/>
+                                        <TableColumn fx:id="namaUserColumn" prefWidth="180" text="Nama Lengkap"/>
+                                        <TableColumn fx:id="emailColumn"    prefWidth="190" text="Email"/>
+                                        <TableColumn fx:id="roleColumn"     prefWidth="100" text="Role"/>
+                                    </columns>
+                                    <columnResizePolicy>
+                                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                                    </columnResizePolicy>
+                                </TableView>
+                            </VBox>
+
+                            <!-- Form Pengguna -->
+                            <VBox spacing="12" prefWidth="290.0"
+                                  style="-fx-background-color: #1e293b; -fx-background-radius: 10;
+                                         -fx-border-color: #334155; -fx-border-radius: 10; -fx-border-width: 1;
+                                         -fx-padding: 16;">
+                                <Label text="👤  Form Pengguna"
+                                       style="-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: #e2e8f0;"/>
+                                <Separator/>
+
+                                <VBox spacing="4">
+                                    <Label text="Username" style="-fx-font-size: 11; -fx-font-weight: bold; -fx-text-fill: #64748b;"/>
+                                    <TextField fx:id="formUsername" promptText="username123"/>
+                                </VBox>
+                                <VBox spacing="4">
+                                    <Label text="Nama Lengkap" style="-fx-font-size: 11; -fx-font-weight: bold; -fx-text-fill: #64748b;"/>
+                                    <TextField fx:id="formNamaUser" promptText="Budi Santoso"/>
+                                </VBox>
+                                <VBox spacing="4">
+                                    <Label text="Email" style="-fx-font-size: 11; -fx-font-weight: bold; -fx-text-fill: #64748b;"/>
+                                    <TextField fx:id="formEmail" promptText="budi@email.com"/>
+                                </VBox>
+                                <VBox spacing="4">
+                                    <Label text="Password (kosong = tidak diubah)"
+                                           style="-fx-font-size: 11; -fx-font-weight: bold; -fx-text-fill: #64748b;"/>
+                                    <TextField fx:id="formPassword" promptText="••••••••"/>
+                                </VBox>
+                                <VBox spacing="4">
+                                    <Label text="Role" style="-fx-font-size: 11; -fx-font-weight: bold; -fx-text-fill: #64748b;"/>
+                                    <ComboBox fx:id="formRole" maxWidth="Infinity"/>
+                                </VBox>
+
+                                <Region VBox.vgrow="ALWAYS"/>
+
+                                <HBox spacing="8">
+                                    <Button fx:id="btnSimpanUser" text="＋ Simpan" onAction="#handleSimpanUser"
+                                            HBox.hgrow="ALWAYS" maxWidth="Infinity"
+                                            style="-fx-background-color: #22c55e; -fx-text-fill: white;
+                                                   -fx-font-weight: bold; -fx-padding: 9; -fx-background-radius: 8;
+                                                   -fx-cursor: hand; -fx-border-color: transparent;"/>
+                                    <Button fx:id="btnUpdateUser" text="✎ Ubah" onAction="#handleUpdateUser"
+                                            HBox.hgrow="ALWAYS" maxWidth="Infinity"
+                                            style="-fx-background-color: #3b82f6; -fx-text-fill: white;
+                                                   -fx-font-weight: bold; -fx-padding: 9; -fx-background-radius: 8;
+                                                   -fx-cursor: hand; -fx-border-color: transparent;"/>
+                                    <Button fx:id="btnHapusUser" text="✕ Hapus" onAction="#handleHapusUser"
+                                            HBox.hgrow="ALWAYS" maxWidth="Infinity"
+                                            style="-fx-background-color: #ef4444; -fx-text-fill: white;
+                                                   -fx-font-weight: bold; -fx-padding: 9; -fx-background-radius: 8;
+                                                   -fx-cursor: hand; -fx-border-color: transparent;"/>
+                                </HBox>
+                                <Button text="↺  Bersihkan" onAction="#handleClearUserForm" maxWidth="Infinity"
+                                        style="-fx-background-color: #334155; -fx-text-fill: #94a3b8;
+                                               -fx-padding: 9; -fx-background-radius: 8;
+                                               -fx-cursor: hand; -fx-border-color: transparent;"/>
+                            </VBox>
+                        </HBox>
+                    </VBox>
+                </Tab>
+            </TabPane>
+        </VBox>
+    </center>
+</BorderPane>
