@@ -3,6 +3,7 @@ package com.example;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
@@ -13,28 +14,10 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 
-/**
- * HomeController — Controller untuk home.fxml
- * 
- * Kelompok B6 - Sistem Informasi Wisata
- * 
- * INTEGRASI DATABASE POSTGRESQL:
- * Semua method yang berkaitan dengan DB ditandai [DB].
- * Gunakan DatabaseHelper.getInstance() untuk mendapatkan koneksi.
- * 
- * Contoh query:
- *   String sql = "SELECT id, nama, lokasi, harga, rating FROM destinasi ORDER BY rating DESC";
- *   try (Connection conn = DatabaseHelper.getInstance().getConnection();
- *        PreparedStatement ps = conn.prepareStatement(sql);
- *        ResultSet rs = ps.executeQuery()) {
- *       while (rs.next()) { ... }
- *   }
- */
 public class HomeController implements Initializable {
-
-    // ========== FXML NODES (harus cocok dengan fx:id di home.fxml) ==========
 
     @FXML private Button navHome;
     @FXML private Button navBooking;
@@ -53,181 +36,230 @@ public class HomeController implements Initializable {
     @FXML private FlowPane destinationFlowPane;
     @FXML private FlowPane categoryFlowPane;
 
-    // ========== INITIALIZE ==========
-
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         setupFilters();
-        // [DB] Muat data dari database
+        updateProfileButton();
         loadDestinations();
+
+        kategoriFilter.setOnAction(e -> loadDestinations());
+        ratingFilter.setOnAction(e -> loadDestinations());
+        hargaFilter.setOnAction(e -> loadDestinations());
+        searchField.setOnAction(e -> handleSearch());
     }
 
-    /**
-     * [DB] Isi ComboBox filter dari data database.
-     * Kategori: SELECT DISTINCT kategori FROM destinasi
-     * Rating  : nilai statis
-     * Harga   : nilai statis (range)
-     */
     private void setupFilters() {
-        // Kategori — [DB] ganti dengan query database
-        kategoriFilter.setItems(FXCollections.observableArrayList(
-            "Semua Kategori", "Pantai", "Pegunungan",
-            "Budaya & Sejarah", "Alam Terbuka",
-            "Taman Hiburan", "Kuliner"
-        ));
+        kategoriFilter.setItems(FXCollections.observableArrayList(DataService.getDistinctKategori()));
         kategoriFilter.getSelectionModel().selectFirst();
 
-        // Rating
         ratingFilter.setItems(FXCollections.observableArrayList(
-            "Semua Rating", "4.5+", "4.0+",
-            "3.0+"
-        ));
+                "Semua Rating", "4.5+", "4.0+", "3.0+"));
         ratingFilter.getSelectionModel().selectFirst();
 
-        // Harga
         hargaFilter.setItems(FXCollections.observableArrayList(
-            "Semua Harga", "< Rp 50.000", "Rp 50.000 – 100.000",
-            "Rp 100.000 – 200.000", "> Rp 200.000"
-        ));
+                "Semua Harga", "< Rp 50.000", "Rp 50.000 – 100.000",
+                "Rp 100.000 – 200.000", "> Rp 200.000"));
         hargaFilter.getSelectionModel().selectFirst();
     }
 
-    /**
-     * [DB] Muat destinasi dari database dan render sebagai card ke destinationFlowPane.
-     * Query: SELECT id, nama, lokasi, harga, rating, gambar_url
-     *        FROM destinasi WHERE aktif = true ORDER BY rating DESC LIMIT 12
-     */
-    private void loadDestinations() {
-        // Bersihkan placeholder
-        destinationFlowPane.getChildren().clear();
-
-        // TODO: Ganti data statis ini dengan query PostgreSQL
-        String[][] dummyData = {
-            {"Candi Borobudur", "Magelang, Jawa Tengah", "Rating: 4.9", "Rp 50.000"},
-            {"Pantai Kuta", "Badung, Bali", "Rating: 4.8", "Rp 30.000"},
-            {"Kawah Ijen", "Banyuwangi, Jawa Timur", "Rating: 4.7", "Rp 25.000"},
-            {"Raja Ampat", "Papua Barat", "Rating: 4.9", "Rp 150.000"},
-            {"Taman Nasional Komodo", "NTT", "Rating: 4.8", "Rp 100.000"},
-            {"Prambanan", "Sleman, DI Yogyakarta", "Rating: 4.7", "Rp 75.000"},
-        };
-
-        for (String[] d : dummyData) {
-            destinationFlowPane.getChildren().add(createDestinationCard(d[0], d[1], d[2], d[3]));
+    private void updateProfileButton() {
+        User user = LoginController.getCurrentUser();
+        if (user != null) {
+            profileButton.setText(user.getNamaLengkap());
+        } else {
+            profileButton.setText("Login");
         }
     }
 
-    /**
-     * Membuat VBox card destinasi secara programatik.
-     * Ini adalah template card sesuai wireframe.
-     */
-    private VBox createDestinationCard(String nama, String lokasi, String rating, String harga) {
+    private void loadDestinations() {
+        destinationFlowPane.getChildren().clear();
+
+        String keyword = searchField.getText() != null ? searchField.getText().trim() : "";
+        String kategori = kategoriFilter.getValue();
+        double minRating = DataService.parseRatingFilter(ratingFilter.getValue());
+        int minHarga = DataService.parseHargaFilter(hargaFilter.getValue());
+        int maxHarga = DataService.parseHargaFilterMax(hargaFilter.getValue());
+
+        List<Destinasi> destinasiList = DataService.searchDestinasi(keyword, kategori, minRating, minHarga, maxHarga);
+
+        if (destinasiList.isEmpty()) {
+            Label empty = new Label("Tidak ada destinasi yang cocok dengan filter.");
+            empty.setStyle("-fx-text-fill: #888888; -fx-font-size: 14; -fx-padding: 40;");
+            destinationFlowPane.getChildren().add(empty);
+            return;
+        }
+
+        for (Destinasi d : destinasiList) {
+            destinationFlowPane.getChildren().add(createDestinationCard(d));
+        }
+    }
+
+    private VBox createDestinationCard(Destinasi d) {
         VBox card = new VBox();
         card.getStyleClass().add("destination-card");
         card.setPrefWidth(280);
 
-        // Placeholder gambar (ganti ImageView dengan URL dari DB)
         VBox imgPlaceholder = new VBox();
         imgPlaceholder.setMinHeight(160);
         imgPlaceholder.setStyle("-fx-background-color: #252525; -fx-alignment: center;");
-        Label imgIcon = new Label("IMAGE");
-        imgIcon.setStyle("-fx-font-size: 20; -fx-text-fill: #555555; -fx-font-weight: bold; -fx-padding: 50 0;");
+        Label imgIcon = new Label(d.getKategori() != null ? d.getKategori().toUpperCase() : "WISATA");
+        imgIcon.setStyle("-fx-font-size: 14; -fx-text-fill: #DEFF9A; -fx-font-weight: bold; -fx-padding: 50 0;");
         imgPlaceholder.getChildren().add(imgIcon);
 
-        // Info Panel
         VBox info = new VBox(8);
         info.setStyle("-fx-padding: 14 15 16 15;");
 
-        Label namaLabel = new Label(nama);
+        Label namaLabel = new Label(d.getNama());
         namaLabel.setStyle("-fx-font-size: 15; -fx-font-weight: bold; -fx-text-fill: #f5f5f5;");
         namaLabel.setWrapText(true);
 
-        Label lokasiLabel = new Label(lokasi);
+        Label lokasiLabel = new Label("📍 " + (d.getLokasi() != null ? d.getLokasi() : "-"));
         lokasiLabel.getStyleClass().add("subtitle");
 
         HBox ratingRow = new HBox(8);
         ratingRow.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
-        Label ratingLabel = new Label(rating);
+        Label ratingLabel = new Label("⭐ " + String.format("%.1f", d.getRating()));
         ratingLabel.getStyleClass().add("rating-badge");
         Region spacer = new Region();
         HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
-        Label hargaLabel = new Label(harga);
+        Label hargaLabel = new Label(d.getHargaFormatted());
         hargaLabel.getStyleClass().add("price-tag");
         ratingRow.getChildren().addAll(ratingLabel, spacer, hargaLabel);
 
         Button detailBtn = new Button("Lihat Detail →");
         detailBtn.setStyle("-fx-padding: 9 15; -fx-font-size: 12; -fx-border-radius: 10; -fx-background-radius: 10;");
         detailBtn.setMaxWidth(Double.MAX_VALUE);
-        // [CONTROLLER] onAction → navigasi ke detail_destinasi.fxml dengan parameter id
-        detailBtn.setOnAction(e -> handleLihatDetail(nama));
+        detailBtn.setOnAction(e -> handleLihatDetail(d));
 
         info.getChildren().addAll(namaLabel, lokasiLabel, ratingRow, detailBtn);
         card.getChildren().addAll(imgPlaceholder, info);
         return card;
     }
 
-    // ========== EVENT HANDLERS ==========
-
-    /** [CONTROLLER] Tombol Cari — filter destinasi dari DB */
     @FXML
     private void handleSearch() {
-        String keyword = searchField.getText().trim();
-        System.out.println("[HomeController] Search: " + keyword);
-        // [DB] SELECT * FROM destinasi WHERE nama ILIKE '%keyword%' OR lokasi ILIKE '%keyword%'
+        loadDestinations();
     }
 
-    /** [CONTROLLER] Reset semua filter */
     @FXML
     private void handleResetFilter() {
+        searchField.clear();
         kategoriFilter.getSelectionModel().selectFirst();
         ratingFilter.getSelectionModel().selectFirst();
         hargaFilter.getSelectionModel().selectFirst();
         loadDestinations();
     }
 
-    /** [CONTROLLER] Lihat semua destinasi */
     @FXML
     private void handleLihatSemua() {
-        System.out.println("[HomeController] Lihat semua destinasi");
+        searchField.clear();
+        kategoriFilter.getSelectionModel().selectFirst();
+        ratingFilter.getSelectionModel().selectFirst();
+        hargaFilter.getSelectionModel().selectFirst();
+        loadDestinations();
     }
 
-    /** [CONTROLLER] Navigasi ke halaman detail destinasi */
-    private void handleLihatDetail(String destinasiNama) {
-        System.out.println("[HomeController] Lihat detail: " + destinasiNama);
-        // TODO: App.setRoot("detail_destinasi") dan kirim parameter destinasi_id
+    private void handleLihatDetail(Destinasi destinasi) {
+        DetailDestinasiController.setDestinasiId(destinasi.getId());
         try {
             App.setRoot("detail_destinasi");
         } catch (Exception e) {
-            e.printStackTrace();
+            showError("Error", "Gagal membuka halaman detail: " + e.getMessage());
         }
     }
 
-    /** [CONTROLLER] Navigasi ke booking */
     @FXML
     private void handleNavBooking() {
-        try { App.setRoot("booking"); } catch (Exception e) { e.printStackTrace(); }
+        User user = LoginController.getCurrentUser();
+        if (user == null) {
+            showInfo("Login Diperlukan", "Silakan login terlebih dahulu untuk melihat pesanan Anda.");
+            try {
+                App.setRoot("login");
+            } catch (Exception e) {
+                showError("Error", "Gagal membuka halaman login.");
+            }
+            return;
+        }
+
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Booking Saya");
+        alert.setHeaderText("Pesanan " + user.getNamaLengkap());
+        alert.setContentText(DataService.getPesananSummaryForUser(user.getId()));
+        alert.showAndWait();
     }
 
-    /** [CONTROLLER] Navigasi ke itinerary */
     @FXML
     private void handleNavItinerary() {
-        try { App.setRoot("itinerary_planner"); } catch (Exception e) { e.printStackTrace(); }
+        User user = LoginController.getCurrentUser();
+        if (user == null) {
+            showInfo("Login Diperlukan", "Silakan login untuk mengakses itinerary.");
+            try {
+                App.setRoot("login");
+            } catch (Exception e) {
+                showError("Error", "Gagal membuka halaman login.");
+            }
+            return;
+        }
+
+        int itineraryId = DataService.getFirstItineraryIdForUser(user.getId());
+        ItineraryPlannerController.setItineraryId(itineraryId > 0 ? itineraryId : 0);
+        ItineraryPlannerController.setCurrentUser(user);
+
+        try {
+            App.setRoot("itinerary_planner");
+        } catch (Exception e) {
+            showError("Error", "Gagal membuka itinerary planner.");
+        }
     }
 
-    /** [CONTROLLER] Navigasi ke login/profile */
     @FXML
     private void handleLogin() {
-        try { App.setRoot("login"); } catch (Exception e) { e.printStackTrace(); }
+        User user = LoginController.getCurrentUser();
+        if (user != null) {
+            try {
+                App.setRoot("dashboard", (DashboardController c) -> {
+                    c.setCurrentUser(user);
+                    c.loadDestinations();
+                });
+            } catch (Exception e) {
+                showError("Error", "Gagal membuka dashboard.");
+            }
+        } else {
+            try {
+                App.setRoot("login");
+            } catch (Exception e) {
+                showError("Error", "Gagal membuka halaman login.");
+            }
+        }
     }
 
-    /** [CONTROLLER] Navigasi ke home (refresh) */
     @FXML
     private void handleNavHome() {
-        try { App.setRoot("home"); } catch (Exception e) { e.printStackTrace(); }
+        try {
+            App.setRoot("home");
+        } catch (Exception e) {
+            showError("Error", "Gagal kembali ke halaman utama.");
+        }
     }
 
-    /** [CONTROLLER] Navigasi ke wishlist (belum sedia) */
     @FXML
     private void handleNavWishlist() {
-        System.out.println("[HomeController] Fitur Wishlist belum diimplementasi");
+        showInfo("Wishlist", "Fitur wishlist akan segera hadir. Simpan destinasi favorit Anda di sini.");
+    }
+
+    private void showError(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    private void showInfo(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }

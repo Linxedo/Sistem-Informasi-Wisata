@@ -5,6 +5,7 @@
 -- ============================================================
 
 -- Drop existing tables if they exist
+DROP TABLE IF EXISTS pesanan CASCADE;
 DROP TABLE IF EXISTS itinerary_detail CASCADE;
 DROP TABLE IF EXISTS itinerary CASCADE;
 DROP TABLE IF EXISTS destinasi CASCADE;
@@ -40,6 +41,29 @@ CREATE TABLE destinasi (
     gambar_url VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ============================================================
+-- TABEL PESANAN - Menyimpan data pemesanan tiket
+-- ============================================================
+CREATE TABLE pesanan (
+    id SERIAL PRIMARY KEY,
+    user_id INT,
+    destinasi_id INT NOT NULL,
+    tanggal_kunjungan DATE NOT NULL,
+    tipe_tiket VARCHAR(50) NOT NULL,
+    jumlah_dewasa INT NOT NULL DEFAULT 1,
+    jumlah_anak INT NOT NULL DEFAULT 0,
+    nama_pemesan VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    telepon VARCHAR(15) NOT NULL,
+    catatan TEXT,
+    total_harga INT NOT NULL,
+    metode_pembayaran VARCHAR(50) NOT NULL,
+    status VARCHAR(20) DEFAULT 'Pending' CHECK (status IN ('Pending', 'Confirmed', 'Cancelled')),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
+    FOREIGN KEY (destinasi_id) REFERENCES destinasi(id) ON DELETE CASCADE
 );
 
 -- ============================================================

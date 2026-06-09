@@ -120,6 +120,35 @@ public class DatabaseHelper {
         }
     }
 
+    /**
+     * Membuat tabel yang dibutuhkan aplikasi jika belum ada.
+     */
+    private void ensureRequiredTables(Connection conn) {
+        String sql = "CREATE TABLE IF NOT EXISTS pesanan (" +
+                "id SERIAL PRIMARY KEY, " +
+                "user_id INT REFERENCES users(id) ON DELETE SET NULL, " +
+                "destinasi_id INT NOT NULL REFERENCES destinasi(id) ON DELETE CASCADE, " +
+                "tanggal_kunjungan DATE NOT NULL, " +
+                "tipe_tiket VARCHAR(50) NOT NULL, " +
+                "jumlah_dewasa INT NOT NULL DEFAULT 1, " +
+                "jumlah_anak INT NOT NULL DEFAULT 0, " +
+                "nama_pemesan VARCHAR(100) NOT NULL, " +
+                "email VARCHAR(100) NOT NULL, " +
+                "telepon VARCHAR(15) NOT NULL, " +
+                "catatan TEXT, " +
+                "total_harga INT NOT NULL, " +
+                "metode_pembayaran VARCHAR(50) NOT NULL, " +
+                "status VARCHAR(20) DEFAULT 'Pending', " +
+                "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
+                ")";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.execute();
+            LOGGER.log(Level.INFO, "Tabel pesanan siap digunakan");
+        } catch (SQLException e) {
+            LOGGER.log(Level.WARNING, "Gagal membuat tabel pesanan: " + e.getMessage());
+        }
+    }
+
     // ============================================================
     // UTILITY METHODS
     // ============================================================
@@ -135,6 +164,7 @@ public class DatabaseHelper {
         try {
             conn = getConnection();
             if (conn != null) {
+                ensureRequiredTables(conn);
                 System.out.println("✓ Koneksi database berhasil!");
                 return true;
             } else {

@@ -365,8 +365,8 @@ public class ItineraryController {
             // INSERT BARU
             insertNewItinerary(namaRencana, startDate, endDate);
 
-            // Jika ada destinasi yang dipilih, tambahkan
-            if (selectedDestinasi != null && !currentDetails.isEmpty()) {
+            // Jika ada destinasi yang dipilih dari dashboard, tambahkan otomatis
+            if (selectedDestinasi != null && currentItinerary != null) {
                 addDestinationToItinerary();
             }
         } else {

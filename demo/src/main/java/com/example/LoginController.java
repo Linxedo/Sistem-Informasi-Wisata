@@ -2,9 +2,6 @@ package com.example;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 
@@ -314,31 +311,10 @@ public class LoginController {
      * @throws IOException jika gagal load FXML
      */
     private void openDashboard(User user) throws IOException {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("dashboard.fxml"));
-            Parent root = loader.load();
-
-            // Get controller dan set current user
-            DashboardController controller = loader.getController();
+        App.setRoot("dashboard", (DashboardController controller) -> {
             controller.setCurrentUser(user);
             controller.loadDestinations();
-
-            // Buka scene baru
-            Stage stage = (Stage) loginButton.getScene().getWindow();
-            Scene scene = new Scene(root);
-
-            // Load CSS
-            String css = getClass().getResource("application.css").toExternalForm();
-            scene.getStylesheets().add(css);
-
-            stage.setScene(scene);
-            stage.setTitle("Sistem Eksplorasi Wisata - Dashboard");
-            stage.show();
-
-        } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Error loading dashboard", e);
-            throw e;
-        }
+        });
     }
 
     /**

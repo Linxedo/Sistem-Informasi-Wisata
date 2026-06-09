@@ -390,21 +390,10 @@ public class DashboardController {
         LoginController.setCurrentUser(null);
         
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("login.fxml"));
-            Parent root = loader.load();
-            
-            Stage stage = (Stage) logoutButton.getScene().getWindow();
-            Scene scene = new Scene(root);
-            String css = getClass().getResource("application.css").toExternalForm();
-            scene.getStylesheets().add(css);
-            
-            stage.setScene(scene);
-            stage.setTitle("Sistem Eksplorasi Wisata - Login");
-            stage.show();
-            
+            App.setRoot("home");
         } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Error loading login page", e);
-            showError("Error", "Gagal kembali ke login");
+            LOGGER.log(Level.SEVERE, "Error loading home page", e);
+            showError("Error", "Gagal kembali ke halaman utama");
         }
     }
     

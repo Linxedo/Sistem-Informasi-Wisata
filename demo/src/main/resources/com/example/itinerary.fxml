@@ -24,7 +24,7 @@
             <HBox alignment="CENTER_LEFT" spacing="20.0">
                 <Label style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #FFFFFF;" text="📋 Rencana Perjalanan Saya" />
                 <Region HBox.hgrow="ALWAYS" />
-                <Button text="← Kembali" style="-fx-font-size: 12; -fx-font-weight: bold; -fx-padding: 10; -fx-background-color: #666666; -fx-text-fill: #FFFFFF; -fx-background-radius: 5;" minHeight="40.0" minWidth="120.0" />
+                <Button fx:id="closeButton" onAction="#handleClose" text="← Kembali" style="-fx-font-size: 12; -fx-font-weight: bold; -fx-padding: 10; -fx-background-color: #666666; -fx-text-fill: #FFFFFF; -fx-background-radius: 5;" minHeight="40.0" minWidth="120.0" />
             </HBox>
         </VBox>
     </top>
@@ -76,8 +76,8 @@
                 
                 <!-- ACTION BUTTONS -->
                 <HBox spacing="10.0">
-                    <Button fx:id="saveButton" minHeight="40.0" HBox.hgrow="ALWAYS" style="-fx-font-size: 12; -fx-font-weight: bold; -fx-padding: 12; -fx-background-color: #4CAF50; -fx-text-fill: #FFFFFF; -fx-background-radius: 5; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 5, 0, 0, 2);" text="💾 Simpan" />
-                    <Button fx:id="deleteButton" minHeight="40.0" HBox.hgrow="ALWAYS" style="-fx-font-size: 12; -fx-font-weight: bold; -fx-padding: 12; -fx-background-color: #FF6B6B; -fx-text-fill: #FFFFFF; -fx-background-radius: 5; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 5, 0, 0, 2);" text="🗑️ Hapus" />
+                    <Button fx:id="saveButton" onAction="#handleSaveItinerary" minHeight="40.0" HBox.hgrow="ALWAYS" style="-fx-font-size: 12; -fx-font-weight: bold; -fx-padding: 12; -fx-background-color: #4CAF50; -fx-text-fill: #FFFFFF; -fx-background-radius: 5; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 5, 0, 0, 2);" text="💾 Simpan" />
+                    <Button fx:id="deleteButton" onAction="#handleDelete" minHeight="40.0" HBox.hgrow="ALWAYS" style="-fx-font-size: 12; -fx-font-weight: bold; -fx-padding: 12; -fx-background-color: #FF6B6B; -fx-text-fill: #FFFFFF; -fx-background-radius: 5; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 5, 0, 0, 2);" text="🗑️ Hapus" />
                 </HBox>
             </VBox>
             
@@ -103,7 +103,7 @@
                     <HBox alignment="CENTER_LEFT" spacing="15.0">
                         <Label style="-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: #0D47A1;" text="📍 Detail Destinasi" />
                         <Region HBox.hgrow="ALWAYS" />
-                        <Button fx:id="addDestinationButton" minHeight="35.0" style="-fx-font-size: 11; -fx-font-weight: bold; -fx-padding: 8; -fx-background-color: #FF9800; -fx-text-fill: #FFFFFF; -fx-background-radius: 5; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 5, 0, 0, 2);" text="➕ Tambah Destinasi" />
+                        <Button fx:id="addDestinationButton" onAction="#handleAddDestination" minHeight="35.0" style="-fx-font-size: 11; -fx-font-weight: bold; -fx-padding: 8; -fx-background-color: #FF9800; -fx-text-fill: #FFFFFF; -fx-background-radius: 5; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 5, 0, 0, 2);" text="➕ Tambah Destinasi" />
                     </HBox>
                     
                     <TableView fx:id="detailTable" VBox.vgrow="ALWAYS">
@@ -115,7 +115,7 @@
                         </columns>
                     </TableView>
                     
-                    <Button fx:id="removeButton" minHeight="35.0" style="-fx-font-size: 11; -fx-font-weight: bold; -fx-padding: 8; -fx-background-color: #FF6B6B; -fx-text-fill: #FFFFFF; -fx-background-radius: 5; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 5, 0, 0, 2);" text="🗑️ Hapus Destinasi" />
+                    <Button fx:id="removeButton" onAction="#handleRemove" minHeight="35.0" style="-fx-font-size: 11; -fx-font-weight: bold; -fx-padding: 8; -fx-background-color: #FF6B6B; -fx-text-fill: #FFFFFF; -fx-background-radius: 5; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 5, 0, 0, 2);" text="🗑️ Hapus Destinasi" />
                 </VBox>
             </VBox>
         </HBox>
