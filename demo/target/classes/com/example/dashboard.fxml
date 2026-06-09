@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="1000.0" styleClass="root" stylesheets="@application.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.DashboardController">
+    
+    <!-- TOP - HEADER -->
+    <top>
+        <VBox style="-fx-padding: 15; -fx-border-color: #DEFF9A; -fx-border-width: 0 0 2 0;">
+            <HBox alignment="CENTER_LEFT" spacing="20.0">
+                <Label fx:id="welcomeLabel" style="-fx-font-size: 20; -fx-font-weight: bold; -fx-text-fill: #DEFF9A;" text="Selamat Datang" />
+                <Region HBox.hgrow="ALWAYS" />
+                <Button fx:id="myItineraryButton" minHeight="35.0" minWidth="120.0" onAction="#handleMyItinerary" style="-fx-font-size: 12;" text="Itinerary Saya" />
+                <Button fx:id="logoutButton" minHeight="35.0" minWidth="100.0" onAction="#handleLogout" style="-fx-font-size: 12;" text="Logout" />
+            </HBox>
+        </VBox>
+    </top>
+    
+    <!-- CENTER - MAIN CONTENT -->
+    <center>
+        <HBox spacing="15.0" style="-fx-padding: 15;">
+            
+            <!-- LEFT SIDE - TABLE & SEARCH -->
+            <VBox spacing="10.0" HBox.hgrow="ALWAYS">
+                
+                <!-- SEARCH & FILTER -->
+                <VBox spacing="10.0">
+                    <Label style="-fx-font-size: 14; -fx-font-weight: bold; -fx-text-fill: #DEFF9A;" text="Cari Destinasi Wisata" />
+                    
+                    <TextField fx:id="searchField" promptText="Cari berdasarkan nama, kategori, atau lokasi..." style="-fx-font-size: 12;" />
+                    
+                    <ComboBox fx:id="kategoriFilter" prefWidth="200.0" style="-fx-font-size: 12;" />
+                </VBox>
+                
+                <!-- TABLE VIEW -->
+                <VBox spacing="5.0" VBox.vgrow="ALWAYS">
+                    <Label style="-fx-font-size: 12; -fx-text-fill: #DAFFDE;" text="Daftar Destinasi:" />
+                    <TableView fx:id="destinationTable" VBox.vgrow="ALWAYS">
+                        <columns>
+                            <TableColumn fx:id="idColumn" minWidth="40.0" prefWidth="50.0" text="ID" />
+                            <TableColumn fx:id="namaColumn" minWidth="150.0" prefWidth="200.0" text="Nama Destinasi" />
+                            <TableColumn fx:id="kategoriColumn" minWidth="100.0" prefWidth="120.0" text="Kategori" />
+                            <TableColumn fx:id="hargaColumn" minWidth="80.0" prefWidth="100.0" text="Harga" />
+                            <TableColumn fx:id="ratingColumn" minWidth="60.0" prefWidth="80.0" text="Rating" />
+                        </columns>
+                    </TableView>
+                </VBox>
+            </VBox>
+            
+            <!-- RIGHT SIDE - DETAIL VIEW -->
+            <VBox spacing="10.0" style="-fx-border-color: #DEFF9A; -fx-border-width: 2; -fx-padding: 15; -fx-border-radius: 5;" prefWidth="320.0">
+                
+                <Label style="-fx-font-size: 14; -fx-font-weight: bold; -fx-text-fill: #DEFF9A;" text="Detail Destinasi" />
+                
+                <!-- DESCRIPTION -->
+                <VBox spacing="5.0">
+                    <Label style="-fx-font-size: 12; -fx-text-fill: #DAFFDE; -fx-font-weight: bold;" text="Deskripsi:" />
+                    <TextArea fx:id="deskripsiArea" prefHeight="150.0" wrapText="true" />
+                </VBox>
+                
+                <!-- PRICE -->
+                <Label fx:id="hargaLabel" style="-fx-font-size: 12; -fx-text-fill: #f5f5f5;" text="Harga: -" />
+                
+                <!-- RATING -->
+                <Label fx:id="ratingLabel" style="-fx-font-size: 12; -fx-text-fill: #f5f5f5;" text="Rating: -" />
+                
+                <!-- LOCATION -->
+                <Label fx:id="lokasiLabel" style="-fx-font-size: 12; -fx-text-fill: #f5f5f5;" text="Lokasi: -" wrapText="true" />
+                
+                <!-- SPACER -->
+                <Region VBox.vgrow="ALWAYS" />
+                
+                <!-- ADD TO ITINERARY BUTTON -->
+                <Button fx:id="addToItineraryButton" minHeight="40.0" minWidth="200.0" onAction="#handleAddToItinerary" style="-fx-font-size: 12; -fx-font-weight: bold;" text="+ Tambah ke Itinerary" />
+            </VBox>
+        </HBox>
+    </center>
+</BorderPane>

@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="1000.0" styleClass="root" stylesheets="@application.css" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.ItineraryController">
+    
+    <!-- TOP HEADER -->
+    <top>
+        <VBox style="-fx-padding: 15; -fx-border-color: #DEFF9A; -fx-border-width: 0 0 2 0;">
+            <Label style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #DEFF9A;" text="Itinerary Planner" />
+        </VBox>
+    </top>
+    
+    <!-- CENTER - MAIN CONTENT -->
+    <center>
+        <HBox spacing="15.0" style="-fx-padding: 15;">
+            
+            <!-- LEFT SIDE - ITINERARY LIST & FORM -->
+            <VBox spacing="10.0" prefWidth="400.0">
+                
+                <!-- SELECT ITINERARY -->
+                <VBox spacing="5.0">
+                    <Label style="-fx-font-size: 12; -fx-font-weight: bold; -fx-text-fill: #DEFF9A;" text="Pilih Itinerary:" />
+                    <ComboBox fx:id="itineraryComboBox" prefWidth="200.0" style="-fx-font-size: 12;" />
+                    <Button fx:id="createNewButton" minHeight="30.0" onAction="#handleCreateNew" style="-fx-font-size: 12;" text="+ Buat Rencana Baru" />
+                </VBox>
+                
+                <!-- ITINERARY FORM -->
+                <VBox spacing="10.0" style="-fx-border-color: #DEFF9A; -fx-border-width: 2; -fx-padding: 15; -fx-border-radius: 5;">
+                    
+                    <Label style="-fx-font-size: 12; -fx-font-weight: bold; -fx-text-fill: #DEFF9A;" text="Informasi Rencana Perjalanan" />
+                    
+                    <!-- NAMA RENCANA -->
+                    <VBox spacing="3.0">
+                        <Label style="-fx-font-size: 11; -fx-text-fill: #DAFFDE;" text="Nama Rencana:" />
+                        <TextField fx:id="itineraryNameField" promptText="Contoh: Liburan ke Yogya" style="-fx-font-size: 12;" />
+                    </VBox>
+                    
+                    <!-- TANGGAL MULAI -->
+                    <VBox spacing="3.0">
+                        <Label style="-fx-font-size: 11; -fx-text-fill: #DAFFDE;" text="Tanggal Mulai:" />
+                        <DatePicker fx:id="startDatePicker" style="-fx-font-size: 12;" />
+                    </VBox>
+                    
+                    <!-- TANGGAL SELESAI -->
+                    <VBox spacing="3.0">
+                        <Label style="-fx-font-size: 11; -fx-text-fill: #DAFFDE;" text="Tanggal Selesai:" />
+                        <DatePicker fx:id="endDatePicker" style="-fx-font-size: 12;" />
+                    </VBox>
+                    
+                    <!-- NOTES -->
+                    <VBox spacing="3.0">
+                        <Label style="-fx-font-size: 11; -fx-text-fill: #DAFFDE;" text="Catatan:" />
+                        <TextArea fx:id="notesTextArea" prefHeight="80.0" promptText="Catatan tambahan..." wrapText="true" />
+                    </VBox>
+                    
+                    <!-- BUTTONS -->
+                    <HBox spacing="10.0">
+                        <Button fx:id="saveButton" minHeight="35.0" minWidth="100.0" onAction="#handleSaveItinerary" style="-fx-font-size: 12; -fx-font-weight: bold;" text="Simpan" />
+                        <Button fx:id="deleteButton" minHeight="35.0" minWidth="100.0" onAction="#handleDelete" style="-fx-font-size: 12;" text="Hapus" />
+                    </HBox>
+                </VBox>
+                
+            </VBox>
+            
+            <!-- RIGHT SIDE - ITINERARY DETAILS -->
+            <VBox spacing="10.0" HBox.hgrow="ALWAYS">
+                
+                <!-- SUMMARY -->
+                <VBox spacing="5.0" style="-fx-border-color: #DEFF9A; -fx-border-width: 2; -fx-padding: 10; -fx-border-radius: 5;">
+                    <Label fx:id="totalBiayaLabel" style="-fx-font-size: 14; -fx-font-weight: bold; -fx-text-fill: #DEFF9A;" text="Total Biaya: Rp 0" />
+                    <Label fx:id="durasiLabel" style="-fx-font-size: 12; -fx-text-fill: #DAFFDE;" text="Durasi: - hari" />
+                </VBox>
+                
+                <!-- DESTINATIONS IN ITINERARY -->
+                <VBox spacing="5.0" VBox.vgrow="ALWAYS">
+                    <Label style="-fx-font-size: 12; -fx-font-weight: bold; -fx-text-fill: #DEFF9A;" text="Destinasi dalam Rencana:" />
+                    <TableView fx:id="detailTable" VBox.vgrow="ALWAYS">
+                        <columns>
+                            <TableColumn fx:id="urutanColumn" minWidth="40.0" prefWidth="60.0" text="Urutan" />
+                            <TableColumn fx:id="namaDestinasiColumn" minWidth="150.0" prefWidth="250.0" text="Nama Destinasi" />
+                            <TableColumn fx:id="hargaColumn" minWidth="100.0" prefWidth="120.0" text="Harga" />
+                            <TableColumn fx:id="tanggalColumn" minWidth="100.0" prefWidth="120.0" text="Tanggal Kunjung" />
+                        </columns>
+                    </TableView>
+                </VBox>
+                
+                <!-- BUTTONS -->
+                <HBox spacing="10.0">
+                    <Button fx:id="addDestinationButton" minHeight="35.0" minWidth="150.0" onAction="#handleAddDestination" style="-fx-font-size: 12; -fx-font-weight: bold;" text="+ Tambah Destinasi" />
+                    <Button fx:id="removeButton" minHeight="35.0" minWidth="120.0" onAction="#handleRemove" style="-fx-font-size: 12;" text="Hapus" />
+                    <Region HBox.hgrow="ALWAYS" />
+                    <Button fx:id="closeButton" minHeight="35.0" minWidth="100.0" onAction="#handleClose" style="-fx-font-size: 12;" text="Tutup" />
+                </HBox>
+                
+            </VBox>
+        </HBox>
+    </center>
+</BorderPane>

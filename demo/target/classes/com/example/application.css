@@ -1,0 +1,536 @@
+/**
+ * =====================================================================
+ * APPLICATION CSS - Dark Theme untuk Sistem Eksplorasi Wisata
+ * =====================================================================
+ * 
+ * Warna Utama:
+ * - Background Gelap: #121212, #1a1a1a
+ * - Aksen/Tombol: #DEFF9A (Hijau Muda)
+ * - Teks: #DAFFDE, #f5f5f5 (Putih Terang)
+ * 
+ */
+
+/* =====================================================================
+   ROOT - STYLING UTAMA
+   ===================================================================== */
+
+.root {
+    -fx-base: #121212;
+    -fx-background-color: #121212;
+    -fx-control-inner-background: #1a1a1a;
+    -fx-text-fill: #DAFFDE;
+    -fx-faint-focus-color: #DEFF9A;
+    -fx-focus-color: #DEFF9A;
+}
+
+/* =====================================================================
+   LABEL
+   ===================================================================== */
+
+.label {
+    -fx-text-fill: #DAFFDE;
+    -fx-font-size: 12;
+}
+
+/* =====================================================================
+   TEXT INPUT FIELDS
+   ===================================================================== */
+
+.text-field,
+.password-field,
+.text-area {
+    -fx-control-inner-background: #1a1a1a;
+    -fx-text-fill: #f5f5f5;
+    -fx-padding: 8;
+    -fx-border-radius: 5;
+    -fx-border-color: #DEFF9A;
+    -fx-border-width: 1;
+    -fx-font-size: 12;
+    -fx-focus-color: #DEFF9A;
+    -fx-faint-focus-color: #DEFF9A;
+}
+
+.text-field:hover,
+.password-field:hover,
+.text-area:hover {
+    -fx-border-color: #b8db6f;
+    -fx-border-width: 2;
+}
+
+.text-field:focused,
+.password-field:focused,
+.text-area:focused {
+    -fx-border-color: #DEFF9A;
+    -fx-border-width: 2;
+    -fx-padding: 7;
+}
+
+/* Placeholder text */
+.text-field:prompt,
+.password-field:prompt,
+.text-area:prompt {
+    -fx-text-fill: #888888;
+}
+
+/* =====================================================================
+   BUTTONS
+   ===================================================================== */
+
+.button {
+    -fx-padding: 10 20;
+    -fx-font-size: 12;
+    -fx-font-weight: bold;
+    -fx-background-color: #DEFF9A;
+    -fx-text-fill: #121212;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+    -fx-cursor: hand;
+    -fx-border-width: 0;
+}
+
+.button:hover {
+    -fx-background-color: #b8db6f;
+    -fx-text-fill: #000000;
+}
+
+.button:pressed {
+    -fx-background-color: #9fc84d;
+    -fx-padding: 11 19;
+}
+
+.button:focused {
+    -fx-border-color: #DAFFDE;
+    -fx-border-width: 2;
+    -fx-border-radius: 5;
+}
+
+.button:disabled {
+    -fx-background-color: #555555;
+    -fx-text-fill: #888888;
+    -fx-cursor: default;
+}
+
+/* =====================================================================
+   COMBOBOX
+   ===================================================================== */
+
+.combo-box {
+    -fx-background-color: #1a1a1a;
+    -fx-border-color: #DEFF9A;
+    -fx-border-width: 1;
+    -fx-border-radius: 5;
+    -fx-padding: 8;
+    -fx-text-fill: #f5f5f5;
+    -fx-font-size: 12;
+}
+
+.combo-box:hover {
+    -fx-border-color: #b8db6f;
+    -fx-border-width: 2;
+    -fx-padding: 7;
+}
+
+.combo-box:focused {
+    -fx-border-color: #DEFF9A;
+    -fx-border-width: 2;
+    -fx-padding: 7;
+}
+
+.combo-box-popup .list-view {
+    -fx-background-color: #1a1a1a;
+    -fx-padding: 5;
+}
+
+.combo-box-popup .list-view .list-cell {
+    -fx-text-fill: #DAFFDE;
+    -fx-background-color: #1a1a1a;
+}
+
+.combo-box-popup .list-view .list-cell:hover {
+    -fx-background-color: #2a2a2a;
+}
+
+.combo-box-popup .list-view .list-cell:selected {
+    -fx-background-color: #DEFF9A;
+    -fx-text-fill: #121212;
+}
+
+/* =====================================================================
+   CHECKBOX & RADIO BUTTON
+   ===================================================================== */
+
+.check-box {
+    -fx-text-fill: #DAFFDE;
+    -fx-font-size: 12;
+}
+
+.check-box:selected .box {
+    -fx-background-color: #DEFF9A;
+    -fx-border-color: #DEFF9A;
+}
+
+.check-box:selected .mark {
+    -fx-text-fill: #121212;
+}
+
+.check-box .box {
+    -fx-border-color: #DEFF9A;
+    -fx-border-width: 2;
+    -fx-border-radius: 3;
+}
+
+/* =====================================================================
+   TABLEVIEW
+   ===================================================================== */
+
+.table-view {
+    -fx-background-color: #1a1a1a;
+    -fx-control-inner-background: #1a1a1a;
+    -fx-table-cell-border-color: #2a2a2a;
+    -fx-text-fill: #DAFFDE;
+}
+
+.table-view .column-header {
+    -fx-background-color: #DEFF9A;
+    -fx-text-fill: #121212;
+    -fx-font-weight: bold;
+    -fx-font-size: 12;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #DEFF9A;
+}
+
+.table-view .table-cell {
+    -fx-text-fill: #DAFFDE;
+    -fx-padding: 10;
+    -fx-font-size: 11;
+}
+
+.table-view .table-row-cell {
+    -fx-background-color: #1a1a1a;
+}
+
+.table-view .table-row-cell:hover {
+    -fx-background-color: #2a2a2a;
+}
+
+.table-view .table-row-cell:selected {
+    -fx-background-color: #DEFF9A;
+    -fx-text-fill: #121212;
+}
+
+.table-view .table-row-cell:selected .table-cell {
+    -fx-text-fill: #121212;
+}
+
+/* =====================================================================
+   LISTVIEW
+   ===================================================================== */
+
+.list-view {
+    -fx-background-color: #1a1a1a;
+    -fx-border-color: #DEFF9A;
+    -fx-border-width: 1;
+    -fx-border-radius: 5;
+    -fx-padding: 5;
+}
+
+.list-view .list-cell {
+    -fx-text-fill: #DAFFDE;
+    -fx-background-color: #1a1a1a;
+    -fx-padding: 10;
+    -fx-font-size: 12;
+}
+
+.list-view .list-cell:hover {
+    -fx-background-color: #2a2a2a;
+}
+
+.list-view .list-cell:selected {
+    -fx-background-color: #DEFF9A;
+    -fx-text-fill: #121212;
+}
+
+/* =====================================================================
+   SCROLL BAR
+   ===================================================================== */
+
+.scroll-bar {
+    -fx-base: #1a1a1a;
+}
+
+.scroll-bar:vertical .thumb {
+    -fx-background-color: #DEFF9A;
+    -fx-background-radius: 5;
+}
+
+.scroll-bar:vertical .thumb:hover {
+    -fx-background-color: #b8db6f;
+}
+
+.scroll-bar:vertical .increment-button,
+.scroll-bar:vertical .decrement-button {
+    -fx-padding: 0;
+}
+
+.scroll-bar:horizontal .thumb {
+    -fx-background-color: #DEFF9A;
+    -fx-background-radius: 5;
+}
+
+.scroll-bar:horizontal .thumb:hover {
+    -fx-background-color: #b8db6f;
+}
+
+.scroll-bar .increment-arrow,
+.scroll-bar .decrement-arrow {
+    -fx-padding: 0;
+}
+
+/* =====================================================================
+   DATEPICKER
+   ===================================================================== */
+
+.date-picker {
+    -fx-background-color: #1a1a1a;
+    -fx-border-color: #DEFF9A;
+    -fx-border-width: 1;
+    -fx-border-radius: 5;
+    -fx-padding: 8;
+    -fx-text-fill: #f5f5f5;
+    -fx-font-size: 12;
+}
+
+.date-picker:hover {
+    -fx-border-color: #b8db6f;
+}
+
+.date-picker:focused {
+    -fx-border-color: #DEFF9A;
+    -fx-border-width: 2;
+}
+
+.date-picker-popup {
+    -fx-background-color: #1a1a1a;
+}
+
+/* =====================================================================
+   DIALOG & ALERT
+   ===================================================================== */
+
+.dialog-pane {
+    -fx-background-color: #121212;
+    -fx-text-fill: #DAFFDE;
+}
+
+.dialog-pane .header-panel {
+    -fx-background-color: #1a1a1a;
+}
+
+.dialog-pane .label {
+    -fx-text-fill: #DAFFDE;
+}
+
+.dialog-pane .header-panel .label {
+    -fx-text-fill: #DEFF9A;
+    -fx-font-size: 14;
+    -fx-font-weight: bold;
+}
+
+.alert {
+    -fx-content-text-alignment: left;
+}
+
+/* =====================================================================
+   HYPERLINK
+   ===================================================================== */
+
+.hyperlink {
+    -fx-text-fill: #DEFF9A;
+    -fx-underline: false;
+    -fx-font-size: 12;
+}
+
+.hyperlink:hover {
+    -fx-text-fill: #b8db6f;
+    -fx-underline: true;
+    -fx-cursor: hand;
+}
+
+.hyperlink:visited {
+    -fx-text-fill: #DEFF9A;
+}
+
+/* =====================================================================
+   VBOX & HBOX
+   ===================================================================== */
+
+.vbox,
+.hbox {
+    -fx-text-fill: #DAFFDE;
+}
+
+/* =====================================================================
+   TAB PANE
+   ===================================================================== */
+
+.tab-pane {
+    -fx-background-color: #121212;
+    -fx-tab-min-width: 100;
+    -fx-tab-min-height: 40;
+}
+
+.tab-pane .tab-header-area {
+    -fx-background-color: #1a1a1a;
+    -fx-border-color: #DEFF9A;
+    -fx-border-width: 0 0 2 0;
+}
+
+.tab {
+    -fx-background-color: #1a1a1a;
+    -fx-text-fill: #DAFFDE;
+    -fx-padding: 10;
+    -fx-font-size: 12;
+}
+
+.tab:selected {
+    -fx-background-color: #DEFF9A;
+    -fx-text-fill: #121212;
+}
+
+.tab-pane .tab-content-area {
+    -fx-background-color: #121212;
+    -fx-padding: 10;
+}
+
+/* =====================================================================
+   SEPARATOR
+   ===================================================================== */
+
+.separator {
+    -fx-text-fill: #DEFF9A;
+}
+
+.separator:vertical .line {
+    -fx-border-color: #DEFF9A;
+    -fx-border-width: 1;
+}
+
+.separator:horizontal .line {
+    -fx-border-color: #DEFF9A;
+    -fx-border-width: 1;
+}
+
+/* =====================================================================
+   PROGRESS BAR
+   ===================================================================== */
+
+.progress-bar {
+    -fx-control-inner-background: #1a1a1a;
+    -fx-border-color: #DEFF9A;
+}
+
+.progress-bar .bar {
+    -fx-background-color: #DEFF9A;
+}
+
+/* =====================================================================
+   TOGGLE BUTTON
+   ===================================================================== */
+
+.toggle-button {
+    -fx-background-color: #1a1a1a;
+    -fx-border-color: #DEFF9A;
+    -fx-border-width: 2;
+    -fx-border-radius: 5;
+    -fx-text-fill: #DAFFDE;
+    -fx-padding: 10 20;
+    -fx-font-size: 12;
+}
+
+.toggle-button:selected {
+    -fx-background-color: #DEFF9A;
+    -fx-text-fill: #121212;
+}
+
+.toggle-button:hover {
+    -fx-border-color: #b8db6f;
+}
+
+/* =====================================================================
+   CUSTOM STYLES
+   ===================================================================== */
+
+/* Tombol aksen utama - warna hijau cerah */
+.button-primary {
+    -fx-background-color: #DEFF9A;
+    -fx-text-fill: #121212;
+    -fx-font-weight: bold;
+    -fx-font-size: 14;
+    -fx-padding: 15 30;
+}
+
+.button-primary:hover {
+    -fx-background-color: #b8db6f;
+}
+
+/* Tombol sekunder - outline */
+.button-secondary {
+    -fx-background-color: transparent;
+    -fx-border-color: #DEFF9A;
+    -fx-border-width: 2;
+    -fx-border-radius: 5;
+    -fx-text-fill: #DEFF9A;
+    -fx-font-size: 12;
+    -fx-padding: 8 16;
+}
+
+.button-secondary:hover {
+    -fx-border-color: #b8db6f;
+    -fx-text-fill: #b8db6f;
+}
+
+/* Panel utama - dengan border */
+.panel-main {
+    -fx-border-color: #DEFF9A;
+    -fx-border-width: 2;
+    -fx-border-radius: 5;
+    -fx-background-color: #1a1a1a;
+    -fx-padding: 15;
+}
+
+/* Heading utama */
+.heading-main {
+    -fx-font-size: 24;
+    -fx-font-weight: bold;
+    -fx-text-fill: #DEFF9A;
+}
+
+/* Heading sekunder */
+.heading-secondary {
+    -fx-font-size: 16;
+    -fx-font-weight: bold;
+    -fx-text-fill: #DEFF9A;
+}
+
+/* Text kecil */
+.text-small {
+    -fx-font-size: 10;
+    -fx-text-fill: #888888;
+}
+
+/* Status success */
+.status-success {
+    -fx-text-fill: #4ade80;
+}
+
+/* Status error */
+.status-error {
+    -fx-text-fill: #ef4444;
+}
+
+/* Status warning */
+.status-warning {
+    -fx-text-fill: #fbbf24;
+}
